@@ -7,7 +7,8 @@ Description: This is a wrapper for Google's Cloud Vision API.
 Imports:
     RCurl,
     googleAuthR,
-    stringr
+    stringr,
+    jsonlite
 License: GPL (>= 2) | MIT + file LICENSE
 LazyData: true
 RoxygenNote: 6.1.1

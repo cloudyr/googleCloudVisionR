@@ -10,4 +10,4 @@ Imports:
     stringr
 License: GPL (>= 2) | MIT + file LICENSE
 LazyData: true
-RoxygenNote: 5.0.1
+RoxygenNote: 6.1.1

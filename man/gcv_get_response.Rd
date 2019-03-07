@@ -4,11 +4,11 @@
 \alias{gcv_get_response}
 \title{Calling Google's Cloud Vision API}
 \usage{
-gcv_get_response(imagePath, feature = "LABEL_DETECTION",
+gcv_get_response(imagePaths, feature = "LABEL_DETECTION",
   maxNumResults = NULL)
 }
 \arguments{
-\item{imagePath}{string, path or url to the image}
+\item{imagePaths}{string, paths or urls to the images}
 
 \item{feature}{string, one out of: "FACE_DETECTION", "LANDMARK_DETECTION",
 "LOGO_DETECTION", "LABEL_DETECTION", "TEXT_DETECTION"}
@@ -24,7 +24,7 @@ input an image, provide the feature type and maxNumResults of responses
 \examples{
 \dontrun{
     f <- system.file("extdata", "brandlogos.png", package = "RoogleVision")
-    gcv_get_response(imagePath = f, feature = "LOGO_DETECTION")
+    gcv_get_response(imagePaths = f, feature = "LOGO_DETECTION")
 }
 
 }

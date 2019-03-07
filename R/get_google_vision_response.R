@@ -3,7 +3,7 @@
 #'
 #' @import googleAuthR
 #'
-#' @param imagePath string, path or url to the image
+#' @param imagePaths string, paths or urls to the images
 #' @param feature string, one out of: "FACE_DETECTION", "LANDMARK_DETECTION",
 #'   "LOGO_DETECTION", "LABEL_DETECTION", "TEXT_DETECTION"
 #' @param maxNumResults integer, the maximum number of results to return.
@@ -12,45 +12,37 @@
 #'
 #' @examples \dontrun{
 #'     f <- system.file("extdata", "brandlogos.png", package = "RoogleVision")
-#'     gcv_get_response(imagePath = f, feature = "LOGO_DETECTION")
+#'     gcv_get_response(imagePaths = f, feature = "LOGO_DETECTION")
 #' }
 #'
 #' @export
-gcv_get_response <- function(imagePath, feature = "LABEL_DETECTION",
+gcv_get_response <- function(imagePaths, feature = "LABEL_DETECTION",
                              maxNumResults = NULL){
 
-  txt  <- image_to_text(imagePath)
+  txt  <- sapply(imagePaths, image_to_text)
   body <- create_request_body(txt, feature, maxNumResults)
-
-  simpleCall <- gar_api_generator(
-    baseURI = "https://vision.googleapis.com/v1/images:annotate",
-    http_header = "POST"
+  rawResponse <- call_vision_api(body)
+  extract_response(
+    rawResponse[["content"]][["responses"]],
+    imagePaths,
+    feature
   )
-  pp <- simpleCall(the_body = body)
-
-  if (ncol(pp$content$responses) > 0) {
-    res <- extract_response(pp, feature)
-  } else {
-    res <- data.frame(error = "No features detected!")
-  }
-
-  return(res)
 }
 
 #' @title helper function base_encode code the image file
 #' @description base64 encodes an image file
 #'
-#' @param imagePath provide path/url to image
+#' @param imagePaths provide path/url to image
 #' @return get the image back as encoded file
 #'
-image_to_text <- function(imagePath) {
+image_to_text <- function(imagePaths) {
 
-  if (stringr::str_count(imagePath, "http") > 0) {### its a url!
-    content <- RCurl::getBinaryURL(imagePath)
+  if (stringr::str_count(imagePaths, "http") > 0) {### its a url!
+    content <- RCurl::getBinaryURL(imagePaths)
     txt <- RCurl::base64Encode(content, "txt")
   } else {
     txt <- RCurl::base64Encode(readBin(
-      imagePath, "raw", file.info(imagePath)[1, "size"]), "txt"
+      imagePaths, "raw", file.info(imagePaths)[1, "size"]), "txt"
     )
   }
   return(txt)
@@ -59,7 +51,7 @@ image_to_text <- function(imagePath) {
 #' @title helper function to create json for response request
 #' @description creates a json output from the inputs
 #'
-#' @param txt, output of image_to_text
+#' @param txt, output of image_to_text()
 #' @param feature string, one out of: "FACE_DETECTION", "LANDMARK_DETECTION",
 #'   "LOGO_DETECTION", "LABEL_DETECTION", "TEXT_DETECTION"
 #' @param maxNumResults numeric, the maximnum number of rows returned by the
@@ -67,42 +59,67 @@ image_to_text <- function(imagePath) {
 #'
 #' @return get the image back as encoded file
 create_request_body <- function(txt, feature, maxNumResults) {
-  if(is.numeric(maxNumResults)) {
-    request <- list(requests = list(
-      image    = list(content = as.character(txt)),
-      features = list(type = feature, maxResults = maxNumResults)
-    ))
-  } else {
-    request <- list(requests = list(
-      image    = list(content = as.character(txt)),
-      features = list(type = feature)
-    ))
-  }
+  names(txt) <- NULL
+  requests <- list(
+    requests = lapply(txt, create_single_image_request, feature, maxNumResults)
+  )
+  jsonlite::toJSON(requests, auto_unbox = TRUE)
+}
 
-  jsonlite::toJSON(request, auto_unbox = TRUE)
+create_single_image_request <- function(txt, feature, maxNumResults) {
+
+  feature_list <- list(type = feature)
+  if(is.numeric(maxNumResults)) feature_list[["maxResults"]] <- maxNumResults
+
+  list(
+    image    = list(content = as.character(txt)),
+    features = feature_list
+  )
+}
+
+#' @title helper function to send POST request to the Google Vision API
+#' @description sends the request defined in `body` to the API
+#'
+#' @param body, output of create_request_body()
+#'
+#' @return API response in raw format
+call_vision_api <- function(body) {
+
+  simple_call <- gar_api_generator(
+    baseURI = "https://vision.googleapis.com/v1/images:annotate",
+    http_header = "POST"
+  )
+  simple_call(the_body = body)
 }
 
 #' @title helper function code to extract the response data.frame
 #' @description a utility to extract features from the API response
 #'
-#' @param pp an API response object
+#' @param responses an API response object
+#' @param imagePaths string, paths or urls to the images
 #' @param feature the name of the feature to return
 #' @return a data frame
 #'
-extract_response <- function(pp, feature){
-  if (feature == "LABEL_DETECTION") {
-    return(pp$content$responses$labelAnnotations[[1]])
-  }
-  if (feature == "FACE_DETECTION") {
-    return(pp$content$responses$faceAnnotations[[1]])
-  }
-  if (feature == "LOGO_DETECTION") {
-    return(pp$content$responses$logoAnnotations[[1]])
-  }
-  if (feature == "TEXT_DETECTION") {
-    return(pp$content$responses$textAnnotations[[1]])
-  }
-  if (feature == "LANDMARK_DETECTION") {
-    return(pp$content$responses$landmarkAnnotations[[1]])
-  }
+extract_response <- function(responses, imagePaths, feature){
+
+  detection_type <- list(
+    LABEL_DETECTION    = "labelAnnotations",
+    FACE_DETECTION     = "faceAnnotations",
+    LOGO_DETECTION     = "logoAnnotations",
+    TEXT_DETECTION     = "textAnnotations",
+    LANDMARK_DETECTION = "landmarkAnnotations"
+  )
+
+  responses_with_paths <- do.call("rbind",
+    lapply(seq_along(imagePaths), function(x) {
+      response_df <- responses[[detection_type[[feature]]]][[x]]
+      response_df[["image_path"]] <- imagePaths[x]
+      response_df
+    })
+  )
+
+  responses_with_paths[, c("image_path", "description", "score")]
 }
+
+
+

@@ -7,7 +7,7 @@
 create_request_body(txt, feature, maxNumResults)
 }
 \arguments{
-\item{txt, }{output of image_to_text}
+\item{txt, }{output of image_to_text()}
 
 \item{feature}{string, one out of: "FACE_DETECTION", "LANDMARK_DETECTION",
 "LOGO_DETECTION", "LABEL_DETECTION", "TEXT_DETECTION"}

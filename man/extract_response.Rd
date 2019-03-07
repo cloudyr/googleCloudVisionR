@@ -4,10 +4,12 @@
 \alias{extract_response}
 \title{helper function code to extract the response data.frame}
 \usage{
-extract_response(pp, feature)
+extract_response(responses, imagePaths, feature)
 }
 \arguments{
-\item{pp}{an API response object}
+\item{responses}{an API response object}
+
+\item{imagePaths}{string, paths or urls to the images}
 
 \item{feature}{the name of the feature to return}
 }

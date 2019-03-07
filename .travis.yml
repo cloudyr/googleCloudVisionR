@@ -7,8 +7,7 @@ r_packages:
 - drat
 after_success:
 - Rscript -e 'library("covr");codecov()'
-- test $TRAVIS_PULL_REQUEST == "false" && test $TRAVIS_BRANCH == "master" && bash
-  drat.sh
+- test $TRAVIS_PULL_REQUEST == "false" && test $TRAVIS_BRANCH == "master"
 env:
   global:
     secure: G2jWT/5RpDUcJVTJD3NUMKKDg/RYXKR9K1TlUqOXEtO4wXs8Q825A4621RYQfDbFi/Sc6gb0iXqBOWc0V16lT5SwWfQgOgvGv87tfh8io9A5B2y066Swp8uvNMzpYkjII37SVfhZIlf5rAAZuabg8hDbw8MmTIc3gE7p/H0W/BwGPAGtxrN+a8CHxjxyxDcMsL9cD2ptPsYi6ACXxNFmhQ18kV+Q9wMorG4q56kfxz1JuoLlVz6UHv4LqCWWWefdIvJujnT58/YpLGplL/A063RTwi+89V63goiu4OPRGnXm7tcQ1Umuwe35xS2ZxQW5nfB9N6UQl+jo3BVeDryAtPZUbgKWz1E+0T0gzeSeKtkGibfw1UHaBPImUzpCbkr7PmYBB1UUf6nsymyBPL6azPWRqvRg2pICDpHUcBBjIYMaq0GNBPY8Ul9KLsEZxb04A4XSJq1cFC+IhqscDNeCiii4dkOhmL+D1lhaxeDlrw5WbK5kN9DzZjYTvJfpeOCs822oX50cL8Z6ZHYYLqZK5nJBjCyFgd3aOe02OvHBATY30GWTSDY5aPQjFfhae3hfoJUBh7AzGvijfJVEfwKapmsuEdn+K/6oSTXR9KvkURXOggEY7JFcJtClYLBQRc4WsPUjO1CZfbmVDFl8QOOMrlmY59F5yolB5Rd/8jPgcRM=

@@ -7,6 +7,7 @@
 #'   "LOGO_DETECTION", "LABEL_DETECTION", "TEXT_DETECTION"
 #' @param maxNumResults integer, the maximum number of results (per image) to be returned.
 #' @param batchSize integer, the chunk size for batch processing
+#' @param savePath string, if specified, results will be saved to this path (as .csv)
 #'
 #' @return a data frame with image annotation results
 #'
@@ -27,13 +28,18 @@
 #' @export
 #'
 gcv_get_image_annotations <- function(imagePaths, feature = "LABEL_DETECTION",
-                                      maxNumResults = NULL, batchSize = 64L) {
+                                      maxNumResults = NULL, batchSize = 64L,
+                                      savePath = NULL) {
 
   imagePathChunks <- split(imagePaths, ceiling(seq_along(imagePaths) / batchSize))
-  do.call(
+  imageAnnotations <- do.call(
     "rbind",
     purrr::map(imagePathChunks, ~gcv_get_response(.x, feature, maxNumResults))
   )
+
+  if(!is.null(savePath)) data.table::fwrite(imageAnnotations, savePath)
+
+  imageAnnotations
 }
 
 #' @title helper function to call the API for one batch of images

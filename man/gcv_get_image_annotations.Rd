@@ -5,7 +5,7 @@
 \title{Calling Google's Cloud Vision API}
 \usage{
 gcv_get_image_annotations(imagePaths, feature = "LABEL_DETECTION",
-  maxNumResults = NULL, batchSize = 64L)
+  maxNumResults = NULL, batchSize = 64L, savePath = NULL)
 }
 \arguments{
 \item{imagePaths}{string, paths or urls to the images}
@@ -16,6 +16,8 @@ gcv_get_image_annotations(imagePaths, feature = "LABEL_DETECTION",
 \item{maxNumResults}{integer, the maximum number of results (per image) to be returned.}
 
 \item{batchSize}{integer, the chunk size for batch processing}
+
+\item{savePath}{string, if specified, results will be saved to this path (as .csv)}
 }
 \value{
 a data frame with image annotation results

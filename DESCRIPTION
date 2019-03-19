@@ -9,7 +9,8 @@ Imports:
     googleAuthR,
     stringr,
     jsonlite,
-    purrr
+    purrr,
+    data.table
 License: GPL (>= 2) | MIT + file LICENSE
 LazyData: true
 RoxygenNote: 6.1.1

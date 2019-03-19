@@ -8,7 +8,8 @@ Imports:
     RCurl,
     googleAuthR,
     stringr,
-    jsonlite
+    jsonlite,
+    purrr
 License: GPL (>= 2) | MIT + file LICENSE
 LazyData: true
 RoxygenNote: 6.1.1

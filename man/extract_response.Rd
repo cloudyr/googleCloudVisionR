@@ -11,7 +11,8 @@ extract_response(responses, imagePaths, feature)
 
 \item{imagePaths}{string, paths or urls to the images}
 
-\item{feature}{the name of the feature to return}
+\item{feature}{string, one out of: "FACE_DETECTION", "LANDMARK_DETECTION",
+"LOGO_DETECTION", "LABEL_DETECTION", "TEXT_DETECTION"}
 }
 \value{
 a data frame

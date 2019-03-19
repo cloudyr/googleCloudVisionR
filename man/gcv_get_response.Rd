@@ -2,10 +2,9 @@
 % Please edit documentation in R/get_google_vision_response.R
 \name{gcv_get_response}
 \alias{gcv_get_response}
-\title{Calling Google's Cloud Vision API}
+\title{helper function to call the API for one batch of images}
 \usage{
-gcv_get_response(imagePaths, feature = "LABEL_DETECTION",
-  maxNumResults = NULL)
+gcv_get_response(imagePaths, feature, maxNumResults)
 }
 \arguments{
 \item{imagePaths}{string, paths or urls to the images}
@@ -19,22 +18,5 @@ gcv_get_response(imagePaths, feature = "LABEL_DETECTION",
 a data frame with image annotation results
 }
 \description{
-Given a list of images, a feature type and the maximum number of responses,
-  this functions calls the Google Cloud Vision API, and returns the image annotations.
-}
-\examples{
-\dontrun{
-    # Label Detection (default), with maximum 7 results returned per image
-    imagePath <- system.file(
-      "extdata", "golden_retriever_puppies.jpg", package = "googleCloudVisionR"
-    )
-    gcv_get_response(imagePaths = imagePath, maxNumResults = 7)
-
-    # Logo detection
-    imagePath <- system.file(
-      "extdata", "brandlogos.png", package = "googleCloudVisionR"
-    )
-    gcv_get_response(imagePaths = imagePath, feature = "LOGO_DETECTION")
-}
-
+helper function to call the API for one batch of images
 }

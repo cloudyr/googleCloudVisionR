@@ -2,12 +2,11 @@
 #' @description Given a list of images, a feature type and the maximum number of responses,
 #'   this functions calls the Google Cloud Vision API, and returns the image annotations.
 #'
-#' @import googleAuthR
-#'
 #' @param imagePaths string, paths or urls to the images
 #' @param feature string, one out of: "FACE_DETECTION", "LANDMARK_DETECTION",
 #'   "LOGO_DETECTION", "LABEL_DETECTION", "TEXT_DETECTION"
 #' @param maxNumResults integer, the maximum number of results (per image) to be returned.
+#' @param batchSize integer, the chunk size for batch processing
 #'
 #' @return a data frame with image annotation results
 #'
@@ -16,18 +15,34 @@
 #'     imagePath <- system.file(
 #'       "extdata", "golden_retriever_puppies.jpg", package = "googleCloudVisionR"
 #'     )
-#'     gcv_get_response(imagePaths = imagePath, maxNumResults = 7)
+#'     gcv_get_image_annotations(imagePaths = imagePath, maxNumResults = 7)
 #'
 #'     # Logo detection
 #'     imagePath <- system.file(
 #'       "extdata", "brandlogos.png", package = "googleCloudVisionR"
 #'     )
-#'     gcv_get_response(imagePaths = imagePath, feature = "LOGO_DETECTION")
+#'     gcv_get_image_annotations(imagePaths = imagePath, feature = "LOGO_DETECTION")
 #' }
 #'
 #' @export
-gcv_get_response <- function(imagePaths, feature = "LABEL_DETECTION",
-                             maxNumResults = NULL){
+#'
+gcv_get_image_annotations <- function(imagePaths, feature = "LABEL_DETECTION",
+                                      maxNumResults = NULL, batchSize = 64L) {
+
+  imagePathChunks <- split(imagePaths, ceiling(seq_along(imagePaths) / batchSize))
+  do.call(
+    "rbind",
+    purrr::map(imagePathChunks, ~gcv_get_response(.x, feature, maxNumResults))
+  )
+}
+
+#' @title helper function to call the API for one batch of images
+#'
+#' @inheritParams gcv_get_image_annotations
+#'
+#' @return a data frame with image annotation results
+#'
+gcv_get_response <- function(imagePaths, feature, maxNumResults){
 
   txt  <- sapply(imagePaths, image_to_text)
   body <- create_request_body(txt, feature, maxNumResults)
@@ -39,10 +54,11 @@ gcv_get_response <- function(imagePaths, feature = "LABEL_DETECTION",
   )
 }
 
-#' @title helper function base_encode code the image file
+#' @title helper function to base_encode code the image file
 #' @description base64 encodes an image file
 #'
-#' @param imagePaths provide path/url to image
+#' @inheritParams gcv_get_image_annotations
+#'
 #' @return get the image back as encoded file
 #'
 image_to_text <- function(imagePaths) {
@@ -62,12 +78,10 @@ image_to_text <- function(imagePaths) {
 #' @description creates a json output from the inputs
 #'
 #' @param txt, output of image_to_text()
-#' @param feature string, one out of: "FACE_DETECTION", "LANDMARK_DETECTION",
-#'   "LOGO_DETECTION", "LABEL_DETECTION", "TEXT_DETECTION"
-#' @param maxNumResults numeric, the maximnum number of rows returned by the
-#'   Google Vision API
+#' @inheritParams gcv_get_image_annotations
 #'
-#' @return get the image back as encoded file
+#' @return request body (payload), encoded as json
+#'
 create_request_body <- function(txt, feature, maxNumResults) {
   names(txt) <- NULL
   requests <- list(
@@ -76,6 +90,13 @@ create_request_body <- function(txt, feature, maxNumResults) {
   jsonlite::toJSON(requests, auto_unbox = TRUE)
 }
 
+#' @title helper function to create a list of details of one image annotation request
+#' @description creates a list output from the inputs
+#'
+#' @inheritParams create_request_body
+#'
+#' @return list of request details for one image
+#'
 create_single_image_request <- function(txt, feature, maxNumResults) {
 
   feature_list <- list(type = feature)
@@ -93,9 +114,10 @@ create_single_image_request <- function(txt, feature, maxNumResults) {
 #' @param body, output of create_request_body()
 #'
 #' @return API response in raw format
+#'
 call_vision_api <- function(body) {
 
-  simple_call <- gar_api_generator(
+  simple_call <- googleAuthR::gar_api_generator(
     baseURI = "https://vision.googleapis.com/v1/images:annotate",
     http_header = "POST"
   )
@@ -106,8 +128,8 @@ call_vision_api <- function(body) {
 #' @description a utility to extract features from the API response
 #'
 #' @param responses an API response object
-#' @param imagePaths string, paths or urls to the images
-#' @param feature the name of the feature to return
+#' @inheritParams gcv_get_image_annotations
+#'
 #' @return a data frame
 #'
 extract_response <- function(responses, imagePaths, feature){
@@ -130,6 +152,3 @@ extract_response <- function(responses, imagePaths, feature){
 
   responses_with_paths[, c("image_path", "description", "score")]
 }
-
-
-

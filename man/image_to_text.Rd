@@ -2,12 +2,12 @@
 % Please edit documentation in R/get_google_vision_response.R
 \name{image_to_text}
 \alias{image_to_text}
-\title{helper function base_encode code the image file}
+\title{helper function to base_encode code the image file}
 \usage{
 image_to_text(imagePaths)
 }
 \arguments{
-\item{imagePaths}{provide path/url to image}
+\item{imagePaths}{string, paths or urls to the images}
 }
 \value{
 get the image back as encoded file

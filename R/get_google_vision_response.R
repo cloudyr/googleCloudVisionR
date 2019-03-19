@@ -1,18 +1,28 @@
 #' @title Calling Google's Cloud Vision API
-#' @description input an image, provide the feature type and maxNumResults of responses
+#' @description Given a list of images, a feature type and the maximum number of responses,
+#'   this functions calls the Google Cloud Vision API, and returns the image annotations.
 #'
 #' @import googleAuthR
 #'
 #' @param imagePaths string, paths or urls to the images
 #' @param feature string, one out of: "FACE_DETECTION", "LANDMARK_DETECTION",
 #'   "LOGO_DETECTION", "LABEL_DETECTION", "TEXT_DETECTION"
-#' @param maxNumResults integer, the maximum number of results to return.
+#' @param maxNumResults integer, the maximum number of results (per image) to be returned.
 #'
-#' @return a data frame with results
+#' @return a data frame with image annotation results
 #'
 #' @examples \dontrun{
-#'     f <- system.file("extdata", "brandlogos.png", package = "googleCloudVisionR")
-#'     gcv_get_response(imagePaths = f, feature = "LOGO_DETECTION")
+#'     # Label Detection (default), with maximum 7 results returned per image
+#'     imagePath <- system.file(
+#'       "extdata", "golden_retriever_puppies.jpg", package = "googleCloudVisionR"
+#'     )
+#'     gcv_get_response(imagePaths = imagePath, maxNumResults = 7)
+#'
+#'     # Logo detection
+#'     imagePath <- system.file(
+#'       "extdata", "brandlogos.png", package = "googleCloudVisionR"
+#'     )
+#'     gcv_get_response(imagePaths = imagePath, feature = "LOGO_DETECTION")
 #' }
 #'
 #' @export

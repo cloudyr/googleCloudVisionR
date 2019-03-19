@@ -23,7 +23,7 @@ input an image, provide the feature type and maxNumResults of responses
 }
 \examples{
 \dontrun{
-    f <- system.file("extdata", "brandlogos.png", package = "RoogleVision")
+    f <- system.file("extdata", "brandlogos.png", package = "googleCloudVisionR")
     gcv_get_response(imagePaths = f, feature = "LOGO_DETECTION")
 }
 

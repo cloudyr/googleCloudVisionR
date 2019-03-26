@@ -7,7 +7,6 @@ Description: This is a wrapper for Google's Cloud Vision API.
 Imports:
     RCurl,
     googleAuthR,
-    stringr,
     jsonlite,
     purrr,
     data.table

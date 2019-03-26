@@ -4,10 +4,10 @@
 \alias{image_to_text}
 \title{helper function to base_encode code the image file}
 \usage{
-image_to_text(imagePaths)
+image_to_text(imagePath)
 }
 \arguments{
-\item{imagePaths}{string, paths or urls to the images}
+\item{imagePath}{string, path or url to the image}
 }
 \value{
 get the image back as encoded file

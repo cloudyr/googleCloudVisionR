@@ -31,15 +31,31 @@ gcv_get_image_annotations <- function(imagePaths, feature = "LABEL_DETECTION",
                                       maxNumResults = NULL, batchSize = 64L,
                                       savePath = NULL) {
 
-  imagePathChunks <- split(imagePaths, ceiling(seq_along(imagePaths) / batchSize))
-  imageAnnotations <- do.call(
-    "rbind",
-    purrr::map(imagePathChunks, ~gcv_get_response(.x, feature, maxNumResults))
-  )
+  annotatedImagePaths <- ""
+  if(!is.null(savePath) && file.exists(savePath)) {
+    annotationsFromFile <- data.table::fread(savePath)
+    annotatedImagePaths <- unique(annotationsFromFile[["image_path"]])
+  }
+  imagesToAnnotate <- unique(setdiff(imagePaths, annotatedImagePaths))
 
-  if(!is.null(savePath)) data.table::fwrite(imageAnnotations, savePath)
+  if(length(imagesToAnnotate) > 0) {
+    imagePathChunks <- split_to_chunks(imagesToAnnotate, batchSize)
+    imageAnnotations <- data.table::rbindlist(purrr::map(imagePathChunks, ~{
+      gcvResponse <- gcv_get_response(.x, feature, maxNumResults)
 
-  imageAnnotations
+      if(!is.null(savePath)) data.table::fwrite(gcvResponse, savePath, append = TRUE)
+
+      gcvResponse
+    }))
+  }
+
+  if(exists("annotationsFromFile") && exists("imageAnnotations")) {
+    rbind(annotationsFromFile, imageAnnotations)
+  } else if (exists("annotationsFromFile")) {
+    annotationsFromFile
+  } else {
+    imageAnnotations
+  }
 }
 
 #' @title helper function to call the API for one batch of images
@@ -63,18 +79,18 @@ gcv_get_response <- function(imagePaths, feature, maxNumResults){
 #' @title helper function to base_encode code the image file
 #' @description base64 encodes an image file
 #'
-#' @inheritParams gcv_get_image_annotations
+#' @param imagePath string, path or url to the image
 #'
 #' @return get the image back as encoded file
 #'
-image_to_text <- function(imagePaths) {
+image_to_text <- function(imagePath) {
 
-  if (stringr::str_count(imagePaths, "http") > 0) {### its a url!
-    content <- RCurl::getBinaryURL(imagePaths)
+  if (grepl("^http", imagePath)) {### its a url!
+    content <- RCurl::getBinaryURL(imagePath)
     txt <- RCurl::base64Encode(content, "txt")
   } else {
     txt <- RCurl::base64Encode(readBin(
-      imagePaths, "raw", file.info(imagePaths)[1, "size"]), "txt"
+      imagePath, "raw", file.info(imagePath)[1, "size"]), "txt"
     )
   }
   return(txt)
@@ -157,4 +173,8 @@ extract_response <- function(responses, imagePaths, feature){
   )
 
   responses_with_paths[, c("image_path", "description", "score")]
+}
+
+split_to_chunks <- function(vec, chunkSize) {
+  suppressWarnings(split(vec, ceiling(seq_along(vec) / chunkSize)))
 }

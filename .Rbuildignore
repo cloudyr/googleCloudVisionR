@@ -1,4 +1,4 @@
-.travis.yml
+^\.travis\.yml$
 CONTRIBUTING.md
 README.Rmd
 drat.sh

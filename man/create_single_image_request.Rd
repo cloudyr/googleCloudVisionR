@@ -4,10 +4,10 @@
 \alias{create_single_image_request}
 \title{helper function to create a list of details of one image annotation request}
 \usage{
-create_single_image_request(txt, feature, maxNumResults)
+create_single_image_request(encodedImages, feature, maxNumResults)
 }
 \arguments{
-\item{txt}{output of image_to_text()}
+\item{encodedImages}{character, elements are outputs of image_to_text()}
 
 \item{feature}{string, one out of: "FACE_DETECTION", "LANDMARK_DETECTION",
 "LOGO_DETECTION", "LABEL_DETECTION", "TEXT_DETECTION"}

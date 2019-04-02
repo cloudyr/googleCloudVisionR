@@ -66,8 +66,8 @@ gcv_get_image_annotations <- function(imagePaths, feature = "LABEL_DETECTION",
 #'
 gcv_get_response <- function(imagePaths, feature, maxNumResults){
 
-  txt  <- sapply(imagePaths, image_to_text)
-  body <- create_request_body(txt, feature, maxNumResults)
+  encodedImages <- sapply(imagePaths, image_to_text)
+  body <- create_request_body(encodedImages, feature, maxNumResults)
   rawResponse <- call_vision_api(body)
   extract_response(
     rawResponse[["content"]][["responses"]],
@@ -76,7 +76,7 @@ gcv_get_response <- function(imagePaths, feature, maxNumResults){
   )
 }
 
-#' @title helper function to base_encode code the image file
+#' @title helper function to base64 encode the image file
 #' @description base64 encodes an image file
 #'
 #' @param imagePath string, path or url to the image
@@ -85,29 +85,30 @@ gcv_get_response <- function(imagePaths, feature, maxNumResults){
 #'
 image_to_text <- function(imagePath) {
 
-  if (grepl("^http", imagePath)) {### its a url!
+  if (grepl("^http", imagePath)) {
     content <- RCurl::getBinaryURL(imagePath)
-    txt <- RCurl::base64Encode(content, "txt")
+    encodedImage <- RCurl::base64Encode(content, "txt")
   } else {
-    txt <- RCurl::base64Encode(readBin(
+    encodedImage <- RCurl::base64Encode(readBin(
       imagePath, "raw", file.info(imagePath)[1, "size"]), "txt"
     )
   }
-  return(txt)
+  encodedImage 
 }
 
 #' @title helper function to create json for response request
 #' @description creates a json output from the inputs
 #'
-#' @param txt, output of image_to_text()
+#' @param encodedImages character, elements are outputs of image_to_text()
 #' @inheritParams gcv_get_image_annotations
 #'
 #' @return request body (payload), encoded as json
 #'
-create_request_body <- function(txt, feature, maxNumResults) {
-  names(txt) <- NULL
+create_request_body <- function(encodedImages, feature, maxNumResults) {
+
+  names(encodedImages) <- NULL
   requests <- list(
-    requests = lapply(txt, create_single_image_request, feature, maxNumResults)
+    requests = lapply(encodedImages, create_single_image_request, feature, maxNumResults)
   )
   jsonlite::toJSON(requests, auto_unbox = TRUE)
 }
@@ -119,13 +120,13 @@ create_request_body <- function(txt, feature, maxNumResults) {
 #'
 #' @return list of request details for one image
 #'
-create_single_image_request <- function(txt, feature, maxNumResults) {
+create_single_image_request <- function(encodedImages, feature, maxNumResults) {
 
   feature_list <- list(type = feature)
   if(is.numeric(maxNumResults)) feature_list[["maxResults"]] <- maxNumResults
 
   list(
-    image    = list(content = as.character(txt)),
+    image    = list(content = as.character(encodedImages)),
     features = feature_list
   )
 }
@@ -175,6 +176,13 @@ extract_response <- function(responses, imagePaths, feature){
   responses_with_paths[, c("image_path", "description", "score")]
 }
 
+#' @title helper function to split a vector to approximately equally sized chunks
+#'
+#' @param vec a vector
+#' @param chunkSize integer, how long should the chunks be?
+#' 
+#' @return a list of chunks
+#' 
 split_to_chunks <- function(vec, chunkSize) {
   suppressWarnings(split(vec, ceiling(seq_along(vec) / chunkSize)))
 }

@@ -4,10 +4,10 @@
 \alias{create_request_body}
 \title{helper function to create json for response request}
 \usage{
-create_request_body(txt, feature, maxNumResults)
+create_request_body(encodedImages, feature, maxNumResults)
 }
 \arguments{
-\item{txt, }{output of image_to_text()}
+\item{encodedImages}{character, elements are outputs of image_to_text()}
 
 \item{feature}{string, one out of: "FACE_DETECTION", "LANDMARK_DETECTION",
 "LOGO_DETECTION", "LABEL_DETECTION", "TEXT_DETECTION"}

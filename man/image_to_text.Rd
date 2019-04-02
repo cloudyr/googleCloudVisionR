@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_google_vision_response.R
 \name{image_to_text}
 \alias{image_to_text}
-\title{helper function to base_encode code the image file}
+\title{helper function to base64 encode the image file}
 \usage{
 image_to_text(imagePath)
 }

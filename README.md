@@ -3,16 +3,24 @@
 
 R Package for Image Recognition, Object Detection, and OCR using the Google's Cloud Vision API.
 
-For an overview of the capabilites of the API consult the documentation [here](https://cloud.google.com/vision/).
+## Google Cloud Vision API
+
+> **Cloud Vision API** enables developers to understand the content of an image by encapsulating powerful machine learning models in an easy-to-use REST API. It quickly classifies images into thousands of categories (such as, “sailboat”), detects individual objects and faces within images, and reads printed words contained within images. You can build metadata on your image catalog, moderate offensive content, or enable new marketing scenarios through image sentiment analysis.
+
+Read more on the [capabilities of the Google Cloud Vision API](https://cloud.google.com/vision/).
+
+## About this R package
+
 This package allows you to call the following functionalities: label, text, landmark, face and logo detection.
 
 The project is a continuation of the [RoogleVision](https://github.com/cloudyr/RoogleVision) package
 by Florian Teschner and is relying on the authentication procedures offered by
 [googleAuthR](https://cran.r-project.org/web/packages/googleAuthR/index.html).
 
-WARNING: the project is in active development and is not guaranteed to be stable in terms of
+**WARNING**: the project is in active development and is not guaranteed to be stable in terms of
 function names, signatures, etc. Contributions through issues, pull requests are more than
 welcome.
+
 
 ## Installation
 
@@ -31,7 +39,7 @@ for auto-authentication:
 Sys.setenv("GCV_AUTH_FILE" = "/fullpath/to/auth.json")
 ```
 
-This can alternatively be set on the command line or via an `Renviron.site` or 
+This can alternatively be set on the command line or via an `Renviron.site` or
 `.Renviron` file (see [here](https://cran.r-project.org/web/packages/httr/vignettes/api-packages.html) for instructions).
 
 If this is set, upon loading the package authentication happens
@@ -55,7 +63,7 @@ imagePath <- system.file(
     "extdata", "golden_retriever_puppies.jpg", package = "googleCloudVisionR"
   )
 gcv_get_image_annotations(
-    imagePaths = imagePath, 
+    imagePaths = imagePath,
     feature = "LABEL_DETECTION",
     maxNumResults = 7
 )

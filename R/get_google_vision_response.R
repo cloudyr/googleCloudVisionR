@@ -2,12 +2,13 @@
 #' @description Given a list of images, a feature type and the maximum number of responses,
 #'   this functions calls the Google Cloud Vision API, and returns the image annotations.
 #'
-#' @param imagePaths string, paths or urls to the images
-#' @param feature string, one out of: "FACE_DETECTION", "LANDMARK_DETECTION",
+#' @param imagePaths character, file paths, URLs or Cloud Storage URIs of the images,
+#'   can be a combination of all three
+#' @param feature character, one out of: "FACE_DETECTION", "LANDMARK_DETECTION",
 #'   "LOGO_DETECTION", "LABEL_DETECTION", "TEXT_DETECTION"
 #' @param maxNumResults integer, the maximum number of results (per image) to be returned.
 #' @param batchSize integer, the chunk size for batch processing
-#' @param savePath string, if specified, results will be saved to this path (as .csv)
+#' @param savePath character, if specified, results will be saved to this path (as .csv)
 #'
 #' @return a data frame with image annotation results
 #'
@@ -66,8 +67,7 @@ gcv_get_image_annotations <- function(imagePaths, feature = "LABEL_DETECTION",
 #'
 gcv_get_response <- function(imagePaths, feature, maxNumResults){
 
-  encodedImages <- sapply(imagePaths, image_to_text)
-  body <- create_request_body(encodedImages, feature, maxNumResults)
+  body <- create_request_body(imagePaths, feature, maxNumResults)
   rawResponse <- call_vision_api(body)
   extract_response(
     rawResponse[["content"]][["responses"]],
@@ -76,58 +76,55 @@ gcv_get_response <- function(imagePaths, feature, maxNumResults){
   )
 }
 
-#' @title helper function to base64 encode the image file
-#' @description base64 encodes an image file
-#'
-#' @param imagePath string, path or url to the image
-#'
-#' @return get the image back as encoded file
-#'
-image_to_text <- function(imagePath) {
-
-  if (grepl("^http", imagePath)) {
-    content <- RCurl::getBinaryURL(imagePath)
-    encodedImage <- RCurl::base64Encode(content, "txt")
-  } else {
-    encodedImage <- RCurl::base64Encode(readBin(
-      imagePath, "raw", file.info(imagePath)[1, "size"]), "txt"
-    )
-  }
-  encodedImage 
-}
-
 #' @title helper function to create json for response request
 #' @description creates a json output from the inputs
 #'
-#' @param encodedImages character, elements are outputs of image_to_text()
 #' @inheritParams gcv_get_image_annotations
 #'
 #' @return request body (payload), encoded as json
 #'
-create_request_body <- function(encodedImages, feature, maxNumResults) {
+create_request_body <- function(imagePaths, feature, maxNumResults) {
+  imageRequests <- purrr::map(imagePaths, create_single_image_request, feature, maxNumResults)
 
-  names(encodedImages) <- NULL
-  requests <- list(
-    requests = lapply(encodedImages, create_single_image_request, feature, maxNumResults)
-  )
+  requests <- list(requests = imageRequests)
   jsonlite::toJSON(requests, auto_unbox = TRUE)
 }
 
 #' @title helper function to create a list of details of one image annotation request
 #' @description creates a list output from the inputs
 #'
+#' @param imagePath character, file path, URL or Cloud Storage URI of the image
 #' @inheritParams create_request_body
 #'
 #' @return list of request details for one image
 #'
-create_single_image_request <- function(encodedImages, feature, maxNumResults) {
+create_single_image_request <- function(imagePath, feature, maxNumResults) {
 
-  feature_list <- list(type = feature)
-  if(is.numeric(maxNumResults)) feature_list[["maxResults"]] <- maxNumResults
+  if (grepl("^(http|https|gs)://", imagePath)) {
+    image_in_request <- list(source = list(imageUri = imagePath))
+  } else {
+    image_in_request <- list(content = as.character(encode_image(imagePath)))
+  }
+
+  features_in_request <- list(type = feature)
+  if(is.numeric(maxNumResults)) features_in_request[["maxResults"]] <- maxNumResults
 
   list(
-    image    = list(content = as.character(encodedImages)),
-    features = feature_list
+    image    = image_in_request,
+    features = features_in_request
+  )
+}
+
+#' @title helper function to base64 encode the image file
+#' @description base64 encodes an image file
+#'
+#' @param imagePath character, path to the image
+#'
+#' @return get the image back as encoded file
+#'
+encode_image <- function(imagePath) {
+  RCurl::base64Encode(readBin(
+      imagePath, "raw", file.info(imagePath)[1, "size"]), "txt"
   )
 }
 
@@ -180,9 +177,9 @@ extract_response <- function(responses, imagePaths, feature){
 #'
 #' @param vec a vector
 #' @param chunkSize integer, how long should the chunks be?
-#' 
+#'
 #' @return a list of chunks
-#' 
+#'
 split_to_chunks <- function(vec, chunkSize) {
   suppressWarnings(split(vec, ceiling(seq_along(vec) / chunkSize)))
 }

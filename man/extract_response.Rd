@@ -9,9 +9,10 @@ extract_response(responses, imagePaths, feature)
 \arguments{
 \item{responses}{an API response object}
 
-\item{imagePaths}{string, paths or urls to the images}
+\item{imagePaths}{character, file paths, URLs or Cloud Storage URIs of the images,
+can be a combination of all three}
 
-\item{feature}{string, one out of: "FACE_DETECTION", "LANDMARK_DETECTION",
+\item{feature}{character, one out of: "FACE_DETECTION", "LANDMARK_DETECTION",
 "LOGO_DETECTION", "LABEL_DETECTION", "TEXT_DETECTION"}
 }
 \value{

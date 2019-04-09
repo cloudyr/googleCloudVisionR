@@ -4,12 +4,12 @@
 \alias{create_single_image_request}
 \title{helper function to create a list of details of one image annotation request}
 \usage{
-create_single_image_request(encodedImages, feature, maxNumResults)
+create_single_image_request(imagePath, feature, maxNumResults)
 }
 \arguments{
-\item{encodedImages}{character, elements are outputs of image_to_text()}
+\item{imagePath}{character, file path, URL or Cloud Storage URI of the image}
 
-\item{feature}{string, one out of: "FACE_DETECTION", "LANDMARK_DETECTION",
+\item{feature}{character, one out of: "FACE_DETECTION", "LANDMARK_DETECTION",
 "LOGO_DETECTION", "LABEL_DETECTION", "TEXT_DETECTION"}
 
 \item{maxNumResults}{integer, the maximum number of results (per image) to be returned.}

@@ -8,16 +8,17 @@ gcv_get_image_annotations(imagePaths, feature = "LABEL_DETECTION",
   maxNumResults = NULL, batchSize = 64L, savePath = NULL)
 }
 \arguments{
-\item{imagePaths}{string, paths or urls to the images}
+\item{imagePaths}{character, file paths, URLs or Cloud Storage URIs of the images,
+can be a combination of all three}
 
-\item{feature}{string, one out of: "FACE_DETECTION", "LANDMARK_DETECTION",
+\item{feature}{character, one out of: "FACE_DETECTION", "LANDMARK_DETECTION",
 "LOGO_DETECTION", "LABEL_DETECTION", "TEXT_DETECTION"}
 
 \item{maxNumResults}{integer, the maximum number of results (per image) to be returned.}
 
 \item{batchSize}{integer, the chunk size for batch processing}
 
-\item{savePath}{string, if specified, results will be saved to this path (as .csv)}
+\item{savePath}{character, if specified, results will be saved to this path (as .csv)}
 }
 \value{
 a data frame with image annotation results

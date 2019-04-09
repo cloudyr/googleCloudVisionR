@@ -4,12 +4,13 @@
 \alias{create_request_body}
 \title{helper function to create json for response request}
 \usage{
-create_request_body(encodedImages, feature, maxNumResults)
+create_request_body(imagePaths, feature, maxNumResults)
 }
 \arguments{
-\item{encodedImages}{character, elements are outputs of image_to_text()}
+\item{imagePaths}{character, file paths, URLs or Cloud Storage URIs of the images,
+can be a combination of all three}
 
-\item{feature}{string, one out of: "FACE_DETECTION", "LANDMARK_DETECTION",
+\item{feature}{character, one out of: "FACE_DETECTION", "LANDMARK_DETECTION",
 "LOGO_DETECTION", "LABEL_DETECTION", "TEXT_DETECTION"}
 
 \item{maxNumResults}{integer, the maximum number of results (per image) to be returned.}

@@ -92,3 +92,17 @@ If, for example, we have previously annotated the first batch of images
 whose results have been stored in `savePath`, then only the leftovers
 are annotated. A dataframe with all annotations is returned and the
 new set of annotations gets appended to `savePath`.
+
+Images can not only be read from local disk, but you can use URLs or Google Cloud Storage URIs as well:
+```r
+gcv_get_image_annotations(c(
+    "https://bit.ly/2IhUzdE",
+    "gs://vision-api-handwriting-ocr-bucket/handwriting_image.png"
+), maxNumResults = 2)
+
+#>                                                      image_path description     score
+#> 1:                                       https://bit.ly/2IhUzdE         Dog 0.9953705
+#> 2:                                       https://bit.ly/2IhUzdE      Mammal 0.9890478
+#> 3: gs://vision-api-handwriting-ocr-bucket/handwriting_image.png        Text 0.9540842
+#> 4: gs://vision-api-handwriting-ocr-bucket/handwriting_image.png        Line 0.9027576
+```

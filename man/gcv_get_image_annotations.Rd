@@ -40,6 +40,9 @@ Given a list of images, a feature type and the maximum number of responses,
       "extdata", "brandlogos.png", package = "googleCloudVisionR"
     )
     gcv_get_image_annotations(imagePaths = imagePath, feature = "LOGO_DETECTION")
+
+    # Google Cloud Storage URI as input
+    gcv_get_image_annotations("gs://vision-api-handwriting-ocr-bucket/handwriting_image.png")
 }
 
 }

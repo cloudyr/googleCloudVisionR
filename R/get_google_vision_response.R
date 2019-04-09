@@ -24,6 +24,9 @@
 #'       "extdata", "brandlogos.png", package = "googleCloudVisionR"
 #'     )
 #'     gcv_get_image_annotations(imagePaths = imagePath, feature = "LOGO_DETECTION")
+#'
+#'     # Google Cloud Storage URI as input
+#'     gcv_get_image_annotations("gs://vision-api-handwriting-ocr-bucket/handwriting_image.png")
 #' }
 #'
 #' @export
@@ -170,7 +173,7 @@ extract_response <- function(responses, imagePaths, feature){
     })
   )
 
-  responses_with_paths[, c("image_path", "description", "score")]
+  responses_with_paths[, c("image_path", "description", "score")] ##TODO: for text detection, no score is returned
 }
 
 #' @title helper function to split a vector to approximately equally sized chunks

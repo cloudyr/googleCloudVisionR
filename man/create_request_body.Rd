@@ -11,7 +11,7 @@ create_request_body(imagePaths, feature, maxNumResults)
 can be a combination of all three}
 
 \item{feature}{character, one out of: "FACE_DETECTION", "LABEL_DETECTION",
-"TEXT_DETECTION", "DOCUMENT_TEXT_DETECTION"}
+"TEXT_DETECTION", "DOCUMENT_TEXT_DETECTION", "LOGO_DETECTION"}
 
 \item{maxNumResults}{integer, the maximum number of results (per image) to be returned.}
 }

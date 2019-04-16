@@ -13,7 +13,7 @@ extract_response(responses, imagePaths, feature)
 can be a combination of all three}
 
 \item{feature}{character, one out of: "FACE_DETECTION", "LABEL_DETECTION",
-"TEXT_DETECTION", "DOCUMENT_TEXT_DETECTION"}
+"TEXT_DETECTION", "DOCUMENT_TEXT_DETECTION", "LOGO_DETECTION"}
 }
 \value{
 a data frame

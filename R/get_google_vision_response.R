@@ -5,7 +5,7 @@
 #' @param imagePaths character, file paths, URLs or Cloud Storage URIs of the images,
 #'   can be a combination of all three
 #' @param feature character, one out of: "FACE_DETECTION", "LABEL_DETECTION",
-#'   "TEXT_DETECTION", "DOCUMENT_TEXT_DETECTION"
+#'   "TEXT_DETECTION", "DOCUMENT_TEXT_DETECTION", "LOGO_DETECTION"
 #' @param maxNumResults integer, the maximum number of results (per image) to be returned.
 #' @param batchSize integer, the chunk size for batch processing
 #' @param savePath character, if specified, results will be saved to this path (as .csv)
@@ -172,8 +172,8 @@ extract_response <- function(responses, imagePaths, feature){
     LABEL_DETECTION         = "labelAnnotations",
     TEXT_DETECTION          = "textAnnotations",
     DOCUMENT_TEXT_DETECTION = "textAnnotations",
-    FACE_DETECTION          = "faceAnnotations"
-    # LOGO_DETECTION          = "logoAnnotations",
+    FACE_DETECTION          = "faceAnnotations",
+    LOGO_DETECTION          = "logoAnnotations"
     # LANDMARK_DETECTION      = "landmarkAnnotations"
   )
 
@@ -197,6 +197,8 @@ extractor <- function(feature) {
     document_text_detection_extractor
   } else if (feature == "FACE_DETECTION") {
     face_detection_extractor
+  } else if (feature == "LOGO_DETECTION") {
+    logo_detection_extractor
   }
 }
 
@@ -222,16 +224,22 @@ face_detection_extractor <- function(response) {
   cbind(
     boundingBoxes,
     data.table::as.data.table(response) %>%
-      .[, c("detectionConfidence",
-            "landmarkingConfidence",
-            "joyLikelihood",
-            "sorrowLikelihood",
-            "angerLikelihood",
-            "surpriseLikelihood",
-            "underExposedLikelihood",
-            "blurredLikelihood",
-            "headwearLikelihood"
-           )
+      .[, c("detectionConfidence", "landmarkingConfidence", "joyLikelihood",
+            "sorrowLikelihood", "angerLikelihood", "surpriseLikelihood",
+            "underExposedLikelihood", "blurredLikelihood", "headwearLikelihood")
        ]
+  )
+}
+
+logo_detection_extractor <- function(response) {
+  boundingBoxes <- purrr::map(response[["boundingPoly"]]$vertices, ~{
+    data.table(
+      x = paste(.x[["x"]], collapse = ", "),
+      y = paste(.x[["y"]], collapse = ", "))
+  }) %>% rbindlist()
+
+  cbind(
+    data.table::as.data.table(response)[, c("mid", "description", "score")],
+    boundingBoxes
   )
 }

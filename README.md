@@ -67,14 +67,16 @@ gcv_get_image_annotations(
     feature = "LABEL_DETECTION",
     maxNumResults = 7
 )
-#>                      image_path      description     score
-#> 1: golden_retriever_puppies.jpg              Dog 0.9953705
-#> 2: golden_retriever_puppies.jpg           Mammal 0.9890478
-#> 3: golden_retriever_puppies.jpg       Vertebrate 0.9851104
-#> 4: golden_retriever_puppies.jpg          Canidae 0.9813780
-#> 5: golden_retriever_puppies.jpg        Dog breed 0.9683250
-#> 6: golden_retriever_puppies.jpg            Puppy 0.9400384
-#> 7: golden_retriever_puppies.jpg Golden retriever 0.8966703
+
+#>                      image_path       mid      description     score topicality
+#> 1: golden_retriever_puppies.jpg /m/0bt9lr              Dog 0.9953705  0.9953705
+#> 2: golden_retriever_puppies.jpg  /m/04rky           Mammal 0.9890478  0.9890478
+#> 3: golden_retriever_puppies.jpg  /m/09686       Vertebrate 0.9851104  0.9851104
+#> 4: golden_retriever_puppies.jpg  /m/01z5f          Canidae 0.9813780  0.9813780
+#> 5: golden_retriever_puppies.jpg  /m/0kpmf        Dog breed 0.9683250  0.9683250
+#> 6: golden_retriever_puppies.jpg /m/0d7s3w            Puppy 0.9400384  0.9400384
+#> 7: golden_retriever_puppies.jpg /m/01t032 Golden retriever 0.8966703  0.8966703
+
 ```
 
 Annotation can also happen in batches, allowing for continuing previously
@@ -100,9 +102,9 @@ gcv_get_image_annotations(c(
     "gs://vision-api-handwriting-ocr-bucket/handwriting_image.png"
 ), maxNumResults = 2)
 
-#>                                                      image_path description     score
-#> 1:                                       https://bit.ly/2IhUzdE         Dog 0.9953705
-#> 2:                                       https://bit.ly/2IhUzdE      Mammal 0.9890478
-#> 3: gs://vision-api-handwriting-ocr-bucket/handwriting_image.png        Text 0.9540842
-#> 4: gs://vision-api-handwriting-ocr-bucket/handwriting_image.png        Line 0.9027576
+#>                                                      image_path        mid description     score topicality
+#> 1:                                       https://bit.ly/2IhUzdE  /m/0bt9lr         Dog 0.9953705  0.9953705
+#> 2:                                       https://bit.ly/2IhUzdE   /m/04rky      Mammal 0.9890478  0.9890478
+#> 3: gs://vision-api-handwriting-ocr-bucket/handwriting_image.png /m/07s6nbt        Text 0.9540842  0.9540842
+#> 4: gs://vision-api-handwriting-ocr-bucket/handwriting_image.png  /m/03scnj        Line 0.9027576  0.9027576
 ```

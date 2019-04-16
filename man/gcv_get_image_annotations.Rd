@@ -11,8 +11,8 @@ gcv_get_image_annotations(imagePaths, feature = "LABEL_DETECTION",
 \item{imagePaths}{character, file paths, URLs or Cloud Storage URIs of the images,
 can be a combination of all three}
 
-\item{feature}{character, one out of: "FACE_DETECTION", "LANDMARK_DETECTION",
-"LOGO_DETECTION", "LABEL_DETECTION", "TEXT_DETECTION"}
+\item{feature}{character, one out of: "FACE_DETECTION", "LABEL_DETECTION",
+"TEXT_DETECTION", "DOCUMENT_TEXT_DETECTION"}
 
 \item{maxNumResults}{integer, the maximum number of results (per image) to be returned.}
 
@@ -35,11 +35,11 @@ Given a list of images, a feature type and the maximum number of responses,
     )
     gcv_get_image_annotations(imagePaths = imagePath, maxNumResults = 7)
 
-    # Logo detection
+    # Face detection
     imagePath <- system.file(
-      "extdata", "brandlogos.png", package = "googleCloudVisionR"
+      "extdata", "arnold_wife.jpg", package = "googleCloudVisionR"
     )
-    gcv_get_image_annotations(imagePaths = imagePath, feature = "LOGO_DETECTION")
+    gcv_get_image_annotations(imagePaths = imagePath, feature = "FACE_DETECTION")
 
     # Google Cloud Storage URI as input
     gcv_get_image_annotations("gs://vision-api-handwriting-ocr-bucket/handwriting_image.png")

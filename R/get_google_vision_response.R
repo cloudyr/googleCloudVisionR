@@ -4,8 +4,8 @@
 #'
 #' @param imagePaths character, file paths, URLs or Cloud Storage URIs of the images,
 #'   can be a combination of all three
-#' @param feature character, one out of: "FACE_DETECTION", "LANDMARK_DETECTION",
-#'   "LOGO_DETECTION", "LABEL_DETECTION", "TEXT_DETECTION"
+#' @param feature character, one out of: "FACE_DETECTION", "LABEL_DETECTION",
+#'   "TEXT_DETECTION", "DOCUMENT_TEXT_DETECTION"
 #' @param maxNumResults integer, the maximum number of results (per image) to be returned.
 #' @param batchSize integer, the chunk size for batch processing
 #' @param savePath character, if specified, results will be saved to this path (as .csv)
@@ -19,11 +19,11 @@
 #'     )
 #'     gcv_get_image_annotations(imagePaths = imagePath, maxNumResults = 7)
 #'
-#'     # Logo detection
+#'     # Face detection
 #'     imagePath <- system.file(
-#'       "extdata", "brandlogos.png", package = "googleCloudVisionR"
+#'       "extdata", "arnold_wife.jpg", package = "googleCloudVisionR"
 #'     )
-#'     gcv_get_image_annotations(imagePaths = imagePath, feature = "LOGO_DETECTION")
+#'     gcv_get_image_annotations(imagePaths = imagePath, feature = "FACE_DETECTION")
 #'
 #'     # Google Cloud Storage URI as input
 #'     gcv_get_image_annotations("gs://vision-api-handwriting-ocr-bucket/handwriting_image.png")
@@ -60,6 +60,17 @@ gcv_get_image_annotations <- function(imagePaths, feature = "LABEL_DETECTION",
   } else {
     imageAnnotations
   }
+}
+
+#' @title helper function to split a vector to approximately equally sized chunks
+#'
+#' @param vec a vector
+#' @param chunkSize integer, how long should the chunks be?
+#'
+#' @return a list of chunks
+#'
+split_to_chunks <- function(vec, chunkSize) {
+  suppressWarnings(split(vec, ceiling(seq_along(vec) / chunkSize)))
 }
 
 #' @title helper function to call the API for one batch of images
@@ -158,31 +169,69 @@ call_vision_api <- function(body) {
 extract_response <- function(responses, imagePaths, feature){
 
   detection_type <- list(
-    LABEL_DETECTION    = "labelAnnotations",
-    FACE_DETECTION     = "faceAnnotations",
-    LOGO_DETECTION     = "logoAnnotations",
-    TEXT_DETECTION     = "textAnnotations",
-    LANDMARK_DETECTION = "landmarkAnnotations"
+    LABEL_DETECTION         = "labelAnnotations",
+    TEXT_DETECTION          = "textAnnotations",
+    DOCUMENT_TEXT_DETECTION = "textAnnotations",
+    FACE_DETECTION          = "faceAnnotations"
+    # LOGO_DETECTION          = "logoAnnotations",
+    # LANDMARK_DETECTION      = "landmarkAnnotations"
   )
 
-  responses_with_paths <- do.call("rbind",
-    lapply(seq_along(imagePaths), function(x) {
-      response_df <- responses[[detection_type[[feature]]]][[x]]
-      response_df[["image_path"]] <- imagePaths[x]
-      response_df
-    })
-  )
+  purrr::map2(responses[[detection_type[[feature]]]], imagePaths, ~{
+    responseDT <- extractor(feature)(.x)
+    responseDT[["image_path"]] <- .y
 
-  responses_with_paths[, c("image_path", "description", "score")] ##TODO: for text detection, no score is returned
+    responseDT
+  }) %>%
+    data.table::rbindlist() %>%
+    data.table::setcolorder("image_path")
 }
 
-#' @title helper function to split a vector to approximately equally sized chunks
-#'
-#' @param vec a vector
-#' @param chunkSize integer, how long should the chunks be?
-#'
-#' @return a list of chunks
-#'
-split_to_chunks <- function(vec, chunkSize) {
-  suppressWarnings(split(vec, ceiling(seq_along(vec) / chunkSize)))
+
+extractor <- function(feature) {
+  if (feature == "LABEL_DETECTION") {
+    label_detection_extractor
+  } else if (feature == "TEXT_DETECTION") {
+    text_detection_extractor
+  } else if (feature == "DOCUMENT_TEXT_DETECTION") {
+    document_text_detection_extractor
+  } else if (feature == "FACE_DETECTION") {
+    face_detection_extractor
+  }
+}
+
+label_detection_extractor <- function(response) {
+  data.table::as.data.table(response)
+}
+
+text_detection_extractor <- function(response) {
+  data.table::data.table(description = response[["description"]][1])
+}
+
+document_text_detection_extractor <- function(response) {
+  data.table::data.table(description = response[["description"]][1])
+}
+
+face_detection_extractor <- function(response) {
+  boundingBoxes <- purrr::map(response[["boundingPoly"]]$vertices, ~{
+    data.table(
+      x = paste(.x[["x"]], collapse = ", "),
+      y = paste(.x[["y"]], collapse = ", "))
+  }) %>% rbindlist()
+
+  cbind(
+    boundingBoxes,
+    data.table::as.data.table(response) %>%
+      .[, c("detectionConfidence",
+            "landmarkingConfidence",
+            "joyLikelihood",
+            "sorrowLikelihood",
+            "angerLikelihood",
+            "surpriseLikelihood",
+            "underExposedLikelihood",
+            "blurredLikelihood",
+            "headwearLikelihood"
+           )
+       ]
+  )
 }

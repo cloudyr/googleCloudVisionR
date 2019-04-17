@@ -218,11 +218,7 @@ document_text_detection_extractor <- function(response) {
 }
 
 face_detection_extractor <- function(response) {
-  boundingBoxes <- purrr::map(response[["boundingPoly"]]$vertices, ~{
-    data.table(
-      x = paste(.x[["x"]], collapse = ", "),
-      y = paste(.x[["y"]], collapse = ", "))
-  }) %>% rbindlist()
+  boundingBoxes <- getBoundingBoxes(response)
 
   cbind(
     boundingBoxes,
@@ -235,11 +231,7 @@ face_detection_extractor <- function(response) {
 }
 
 logo_detection_extractor <- function(response) {
-  boundingBoxes <- purrr::map(response[["boundingPoly"]]$vertices, ~{
-    data.table(
-      x = paste(.x[["x"]], collapse = ", "),
-      y = paste(.x[["y"]], collapse = ", "))
-  }) %>% rbindlist()
+  boundingBoxes <- getBoundingBoxes(response)
 
   cbind(
     data.table::as.data.table(response)[, c("mid", "description", "score")],
@@ -248,12 +240,7 @@ logo_detection_extractor <- function(response) {
 }
 
 landmark_detection_extractor <- function(response) {
-  boundingBoxes <- purrr::map(response[["boundingPoly"]]$vertices, ~{
-    data.table(
-      x = paste(.x[["x"]], collapse = ", "),
-      y = paste(.x[["y"]], collapse = ", ")
-    )
-  }) %>% rbindlist()
+  boundingBoxes <- getBoundingBoxes(response)
 
   geoCoordinates <- purrr::map(response[["locations"]], ~{
     as.data.table(.x[["latLng"]])
@@ -264,4 +251,12 @@ landmark_detection_extractor <- function(response) {
     boundingBoxes,
     geoCoordinates
   )
+}
+
+getBoundingBoxes <- function(response) {
+  purrr::map(response[["boundingPoly"]]$vertices, ~{
+      data.table(
+        x = paste(.x[["x"]], collapse = ", "),
+        y = paste(.x[["y"]], collapse = ", "))
+  }) %>% rbindlist()
 }

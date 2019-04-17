@@ -10,8 +10,8 @@ gcv_get_response(imagePaths, feature, maxNumResults)
 \item{imagePaths}{character, file paths, URLs or Cloud Storage URIs of the images,
 can be a combination of all three}
 
-\item{feature}{character, one out of: "FACE_DETECTION", "LABEL_DETECTION",
-"TEXT_DETECTION", "DOCUMENT_TEXT_DETECTION", "LOGO_DETECTION"}
+\item{feature}{character, one out of: "LABEL_DETECTION", "FACE_DETECTION",
+"TEXT_DETECTION", "DOCUMENT_TEXT_DETECTION", "LOGO_DETECTION", "LANDMARK_DETECTION"}
 
 \item{maxNumResults}{integer, the maximum number of results (per image) to be returned.}
 }

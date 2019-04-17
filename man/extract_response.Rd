@@ -12,8 +12,8 @@ extract_response(responses, imagePaths, feature)
 \item{imagePaths}{character, file paths, URLs or Cloud Storage URIs of the images,
 can be a combination of all three}
 
-\item{feature}{character, one out of: "FACE_DETECTION", "LABEL_DETECTION",
-"TEXT_DETECTION", "DOCUMENT_TEXT_DETECTION", "LOGO_DETECTION"}
+\item{feature}{character, one out of: "LABEL_DETECTION", "FACE_DETECTION",
+"TEXT_DETECTION", "DOCUMENT_TEXT_DETECTION", "LOGO_DETECTION", "LANDMARK_DETECTION"}
 }
 \value{
 a data frame

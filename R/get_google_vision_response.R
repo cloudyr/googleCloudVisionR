@@ -4,8 +4,8 @@
 #'
 #' @param imagePaths character, file paths, URLs or Cloud Storage URIs of the images,
 #'   can be a combination of all three
-#' @param feature character, one out of: "FACE_DETECTION", "LABEL_DETECTION",
-#'   "TEXT_DETECTION", "DOCUMENT_TEXT_DETECTION", "LOGO_DETECTION"
+#' @param feature character, one out of: "LABEL_DETECTION", "FACE_DETECTION",
+#'   "TEXT_DETECTION", "DOCUMENT_TEXT_DETECTION", "LOGO_DETECTION", "LANDMARK_DETECTION"
 #' @param maxNumResults integer, the maximum number of results (per image) to be returned.
 #' @param batchSize integer, the chunk size for batch processing
 #' @param savePath character, if specified, results will be saved to this path (as .csv)
@@ -173,8 +173,8 @@ extract_response <- function(responses, imagePaths, feature){
     TEXT_DETECTION          = "textAnnotations",
     DOCUMENT_TEXT_DETECTION = "textAnnotations",
     FACE_DETECTION          = "faceAnnotations",
-    LOGO_DETECTION          = "logoAnnotations"
-    # LANDMARK_DETECTION      = "landmarkAnnotations"
+    LOGO_DETECTION          = "logoAnnotations",
+    LANDMARK_DETECTION      = "landmarkAnnotations"
   )
 
   purrr::map2(responses[[detection_type[[feature]]]], imagePaths, ~{
@@ -187,7 +187,6 @@ extract_response <- function(responses, imagePaths, feature){
     data.table::setcolorder("image_path")
 }
 
-
 extractor <- function(feature) {
   if (feature == "LABEL_DETECTION") {
     label_detection_extractor
@@ -199,6 +198,10 @@ extractor <- function(feature) {
     face_detection_extractor
   } else if (feature == "LOGO_DETECTION") {
     logo_detection_extractor
+  } else if (feature == "LANDMARK_DETECTION") {
+    landmark_detection_extractor
+  } else {
+    stop("Unrecognized feature type")
   }
 }
 
@@ -241,5 +244,24 @@ logo_detection_extractor <- function(response) {
   cbind(
     data.table::as.data.table(response)[, c("mid", "description", "score")],
     boundingBoxes
+  )
+}
+
+landmark_detection_extractor <- function(response) {
+  boundingBoxes <- purrr::map(response[["boundingPoly"]]$vertices, ~{
+    data.table(
+      x = paste(.x[["x"]], collapse = ", "),
+      y = paste(.x[["y"]], collapse = ", ")
+    )
+  }) %>% rbindlist()
+
+  geoCoordinates <- purrr::map(response[["locations"]], ~{
+    as.data.table(.x[["latLng"]])
+  }) %>% rbindlist()
+
+  cbind(
+    data.table::as.data.table(response)[, c("mid", "description", "score")],
+    boundingBoxes,
+    geoCoordinates
   )
 }

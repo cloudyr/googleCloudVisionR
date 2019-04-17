@@ -9,8 +9,8 @@ create_single_image_request(imagePath, feature, maxNumResults)
 \arguments{
 \item{imagePath}{character, file path, URL or Cloud Storage URI of the image}
 
-\item{feature}{character, one out of: "FACE_DETECTION", "LABEL_DETECTION",
-"TEXT_DETECTION", "DOCUMENT_TEXT_DETECTION", "LOGO_DETECTION"}
+\item{feature}{character, one out of: "LABEL_DETECTION", "FACE_DETECTION",
+"TEXT_DETECTION", "DOCUMENT_TEXT_DETECTION", "LOGO_DETECTION", "LANDMARK_DETECTION"}
 
 \item{maxNumResults}{integer, the maximum number of results (per image) to be returned.}
 }

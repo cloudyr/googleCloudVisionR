@@ -187,6 +187,13 @@ extract_response <- function(responses, imagePaths, feature){
     data.table::setcolorder("image_path")
 }
 
+#' @title helper function code to provide an extractor function for different feature types
+#' @description a utility to provide functions to extract features from the API response
+#'
+#' @inheritParams gcv_get_image_annotations
+#'
+#' @return a function
+#'
 extractor <- function(feature) {
   if (feature == "LABEL_DETECTION") {
     label_detection_extractor
@@ -205,18 +212,42 @@ extractor <- function(feature) {
   }
 }
 
+#' @title helper function code to extract API response into a data.table for given feature type
+#'
+#' @param response an element of the API response object
+#'
+#' @return a data.table
+#'
 label_detection_extractor <- function(response) {
   data.table::as.data.table(response)
 }
 
+#' @title helper function code to extract API response into a data.table for given feature type
+#'
+#' @param response an element of the API response object
+#'
+#' @return a data.table
+#'
 text_detection_extractor <- function(response) {
   data.table::data.table(description = response[["description"]][1])
 }
 
+#' @title helper function code to extract API response into a data.table for given feature type
+#'
+#' @param response an element of the API response object
+#'
+#' @return a data.table
+#'
 document_text_detection_extractor <- function(response) {
   data.table::data.table(description = response[["description"]][1])
 }
 
+#' @title helper function code to extract API response into a data.table for given feature type
+#'
+#' @param response an element of the API response object
+#'
+#' @return a data.table
+#'
 face_detection_extractor <- function(response) {
   boundingBoxes <- getBoundingBoxes(response)
 
@@ -230,6 +261,12 @@ face_detection_extractor <- function(response) {
   )
 }
 
+#' @title helper function code to extract API response into a data.table for given feature type
+#'
+#' @param response an element of the API response object
+#'
+#' @return a data.table
+#'
 logo_detection_extractor <- function(response) {
   boundingBoxes <- getBoundingBoxes(response)
 
@@ -239,6 +276,12 @@ logo_detection_extractor <- function(response) {
   )
 }
 
+#' @title helper function code to extract API response into a data.table for given feature type
+#'
+#' @param response an element of the API response object
+#'
+#' @return a data.table
+#'
 landmark_detection_extractor <- function(response) {
   boundingBoxes <- getBoundingBoxes(response)
 
@@ -253,6 +296,12 @@ landmark_detection_extractor <- function(response) {
   )
 }
 
+#' @title helper function code to extract Bounding Box x,y coordinates for an API response element
+#'
+#' @param response an element of the API response object
+#'
+#' @return a data.table
+#'
 getBoundingBoxes <- function(response) {
   purrr::map(response[["boundingPoly"]]$vertices, ~{
       data.table(

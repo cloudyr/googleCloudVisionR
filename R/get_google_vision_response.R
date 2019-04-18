@@ -44,13 +44,13 @@ gcv_get_image_annotations <- function(imagePaths, feature = "LABEL_DETECTION",
 
   if(length(imagesToAnnotate) > 0) {
     imagePathChunks <- split_to_chunks(imagesToAnnotate, batchSize)
-    imageAnnotations <- data.table::rbindlist(purrr::map(imagePathChunks, ~{
+    imageAnnotations <- purrr::map(imagePathChunks, ~{
       gcvResponse <- gcv_get_response(.x, feature, maxNumResults)
 
       if(!is.null(savePath)) data.table::fwrite(gcvResponse, savePath, append = TRUE)
 
       gcvResponse
-    }))
+    }) %>% data.table::rbindlist()
   }
 
   if(exists("annotationsFromFile") && exists("imageAnnotations")) {
@@ -219,7 +219,7 @@ extractor <- function(feature) {
 #' @return a data.table
 #'
 label_detection_extractor <- function(response) {
-  data.table::as.data.table(response)
+    data.table::as.data.table(response)[, c("mid", "description", "score")]
 }
 
 #' @title helper function code to extract API response into a data.table for given feature type
@@ -287,7 +287,7 @@ landmark_detection_extractor <- function(response) {
 
   geoCoordinates <- purrr::map(response[["locations"]], ~{
     as.data.table(.x[["latLng"]])
-  }) %>% rbindlist()
+  }) %>% data.table::rbindlist()
 
   cbind(
     data.table::as.data.table(response)[, c("mid", "description", "score")],
@@ -307,5 +307,5 @@ getBoundingBoxes <- function(response) {
       data.table(
         x = paste(.x[["x"]], collapse = ", "),
         y = paste(.x[["y"]], collapse = ", "))
-  }) %>% rbindlist()
+  }) %>% data.table::rbindlist()
 }

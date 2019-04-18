@@ -50,7 +50,7 @@ gcv_get_image_annotations <- function(imagePaths, feature = "LABEL_DETECTION",
       if(!is.null(savePath)) data.table::fwrite(gcvResponse, savePath, append = TRUE)
 
       gcvResponse
-    }) %>% data.table::rbindlist()
+    }) %>% data.table::rbindlist(fill = TRUE)
   }
 
   if(exists("annotationsFromFile") && exists("imageAnnotations")) {
@@ -177,14 +177,18 @@ extract_response <- function(responses, imagePaths, feature){
     LANDMARK_DETECTION      = "landmarkAnnotations"
   )
 
-  purrr::map2(responses[[detection_type[[feature]]]], imagePaths, ~{
-    responseDT <- extractor(feature)(.x)
-    responseDT[["image_path"]] <- .y
+  if (length(responses) == 0) {
+    data.table::data.table(image_path = imagePaths)
+  } else {
+    purrr::map2(responses[[detection_type[[feature]]]], imagePaths, ~{
+      responseDT <- extractor(feature)(.x)
+      responseDT[["image_path"]] <- .y
 
-    responseDT
-  }) %>%
-    data.table::rbindlist() %>%
-    data.table::setcolorder("image_path")
+      responseDT
+    }) %>%
+      data.table::rbindlist(fill = TRUE) %>%
+      data.table::setcolorder("image_path")
+  }
 }
 
 #' @title helper function code to provide an extractor function for different feature types
@@ -219,7 +223,15 @@ extractor <- function(feature) {
 #' @return a data.table
 #'
 label_detection_extractor <- function(response) {
-    data.table::as.data.table(response)[, c("mid", "description", "score")]
+    if (is.null(response)) {
+      data.table::data.table(
+        mid         = NA_character_,
+        description = NA_character_,
+        score       = NA
+      )
+    } else {
+      data.table::as.data.table(response)[, c("mid", "description", "score")]
+    }
 }
 
 #' @title helper function code to extract API response into a data.table for given feature type

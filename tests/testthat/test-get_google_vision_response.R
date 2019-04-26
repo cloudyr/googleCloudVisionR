@@ -68,16 +68,21 @@ test_that("it does not call API when cached result is available", {
   mockery::expect_called(gcvGetResponseMock, 0)
 })
 
-context("Google Vision API")
-
-test_that("handles case of non-image URL", {
-  callVisionAPIMock <- mockery::mock(
-    list(content = list(responses = data.frame(error = data.frame(code = 3, message = "Nice error message."))))
-  )
-  mockery::stub(gcv_get_image_annotations, "call_vision_api", callVisionAPIMock, depth = 2)
-  
-  expect_error(
-    gcv_get_image_annotations("http://non-image-url"),
-    "Google API returned an error: Nice error message."
-  )
-})
+# context("Google Vision API")
+# 
+# test_that("handles case of non-image URL", {
+#   callVisionAPIMock <- mockery::mock(
+#     list(content = list(responses = data.frame(error = data.frame(code = 3, message = "Nice error message."))))
+#   )
+#   mockery::stub(gcv_get_image_annotations, "call_vision_api", callVisionAPIMock, depth = 2)
+#   
+#   expect_error(
+#     gcv_get_image_annotations("http://non-image-url"),
+#     "Google API returned an error: Nice error message."
+#   )
+# })
+# 
+# create_response <- function(numAnnotations = 0, numErrorrs = 0) {
+#   errors 
+#   list(content = list(responses = data.frame(error = data.frame(code = 3, message = "Nice error message."))))
+# }

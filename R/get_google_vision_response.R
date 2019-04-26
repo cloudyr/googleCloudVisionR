@@ -34,7 +34,15 @@
 gcv_get_image_annotations <- function(imagePaths, feature = "LABEL_DETECTION",
                                       maxNumResults = NULL, batchSize = 64L,
                                       savePath = NULL) {
-
+  invalid_paths <- get_invalid_image_paths(imagePaths)
+  if(length(invalid_paths) > 0) {
+    stop(paste0("Invalid elements in imagePath: ", paste(invalid_paths, collapse = " ")))
+  }
+  
+  if (!(feature %in% names(get_feature_types()))) {
+    stop(paste0("Invalid feature: ", feature, " - it should be one of: ",
+      paste0(paste0("'", names(get_feature_types()), "'"), collapse = ", ")))
+  }
   annotatedImagePaths <- ""
   if(!is.null(savePath) && file.exists(savePath)) {
     annotationsFromFile <- data.table::fread(savePath)
@@ -60,6 +68,17 @@ gcv_get_image_annotations <- function(imagePaths, feature = "LABEL_DETECTION",
   } else {
     imageAnnotations
   }
+}
+
+#' @title helper function to validate input image paths
+#'
+#' @param vec a vector of paths
+#'
+#' @return vector of invalid paths from @vec
+#'
+get_invalid_image_paths <- function(vec) {
+  is_valid <- purrr::map_lgl(vec, ~{(grepl("^(http|https|gs)://", .x)) || file.exists(.x)})
+  vec[!is_valid]
 }
 
 #' @title helper function to split a vector to approximately equally sized chunks
@@ -168,19 +187,12 @@ call_vision_api <- function(body) {
 #'
 extract_response <- function(responses, imagePaths, feature){
 
-  detection_type <- list(
-    LABEL_DETECTION         = "labelAnnotations",
-    TEXT_DETECTION          = "textAnnotations",
-    DOCUMENT_TEXT_DETECTION = "textAnnotations",
-    FACE_DETECTION          = "faceAnnotations",
-    LOGO_DETECTION          = "logoAnnotations",
-    LANDMARK_DETECTION      = "landmarkAnnotations"
-  )
+  feature_type <- get_feature_types()
 
   if (length(responses) == 0) {
     data.table::data.table(image_path = imagePaths)
   } else {
-    purrr::map2(responses[[detection_type[[feature]]]], imagePaths, ~{
+    purrr::map2(responses[[feature_type[[feature]]]], imagePaths, ~{
       responseDT <- extractor(feature)(.x)
       responseDT[["image_path"]] <- .y
 
@@ -189,6 +201,21 @@ extract_response <- function(responses, imagePaths, feature){
       data.table::rbindlist(fill = TRUE) %>%
       data.table::setcolorder("image_path")
   }
+}
+
+#' @title helper function code to record available feature types
+#'
+#' @return a list of available features and their types
+#'
+get_feature_types <- function() {
+  list(
+    LABEL_DETECTION         = "labelAnnotations",
+    TEXT_DETECTION          = "textAnnotations",
+    DOCUMENT_TEXT_DETECTION = "textAnnotations",
+    FACE_DETECTION          = "faceAnnotations",
+    LOGO_DETECTION          = "logoAnnotations",
+    LANDMARK_DETECTION      = "landmarkAnnotations"
+  )
 }
 
 #' @title helper function code to provide an extractor function for different feature types

@@ -26,7 +26,7 @@ welcome.
 
 The package is not yet on CRAN. You can install the package directly from Github:
 ``` r
-devtools::install_github("https://github.com/emartech/googleCloudVisionR")
+devtools::install_github("emartech/googleCloudVisionR")
 ```
 
 ## Authentication

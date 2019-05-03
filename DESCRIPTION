@@ -14,3 +14,7 @@ License: GPL (>= 2) | MIT + file LICENSE
 LazyData: true
 RoxygenNote: 6.1.1
 Encoding: UTF-8
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

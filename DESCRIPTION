@@ -18,5 +18,6 @@ Suggests:
     knitr,
     rmarkdown,
     testthat,
-    mockery
+    mockery,
+    covr
 VignetteBuilder: knitr

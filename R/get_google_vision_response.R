@@ -38,7 +38,7 @@ gcv_get_image_annotations <- function(imagePaths, feature = "LABEL_DETECTION",
   if(length(invalid_paths) > 0) {
     stop(paste0("Invalid elements in imagePath: ", paste(invalid_paths, collapse = " ")))
   }
-  
+
   if (!(feature %in% names(get_feature_types()))) {
     stop(paste0("Invalid feature: ", feature, " - it should be one of: ",
       paste0(paste0("'", names(get_feature_types()), "'"), collapse = ", ")))
@@ -183,24 +183,57 @@ call_vision_api <- function(body) {
 #' @param responses an API response object
 #' @inheritParams gcv_get_image_annotations
 #'
-#' @return a data frame
+#' @return a data.table
 #'
 extract_response <- function(responses, imagePaths, feature){
 
-  feature_type <- get_feature_types()
+  feature_type <- get_feature_types()[[feature]]
+  errors <- data.table(image_path = imagePaths)
+  annotations  <- data.table(image_path = imagePaths)
 
-  if (length(responses) == 0) {
-    data.table::data.table(image_path = imagePaths)
-  } else {
-    purrr::map2(responses[[feature_type[[feature]]]], imagePaths, ~{
-      responseDT <- extractor(feature)(.x)
-      responseDT[["image_path"]] <- .y
-
-      responseDT
-    }) %>%
-      data.table::rbindlist(fill = TRUE) %>%
-      data.table::setcolorder("image_path")
+  if (!is.null(responses[["error"]])) {
+    errors <- extract_error(responses, imagePaths)
   }
+  if (!is.null(responses[[feature_type]])) {
+    annotations <- extract_annotations(responses, imagePaths, feature_type)
+  }
+  merge(annotations, errors, by = "image_path", sort = FALSE)
+}
+
+#' @title helper function code to extract the annotations
+#' @description a utility to extract features from the API response
+#'
+#' @param responses an API response object
+#' @param feature_type the type of annotation as called in the response object
+#' @inheritParams gcv_get_image_annotations
+#'
+#' @return a data.table
+#'
+extract_annotations <- function(responses, imagePaths, feature_type) {
+
+  purrr::map2(responses[[feature_type]], imagePaths, ~{
+    responseDT <- extractor(feature_type)(.x)
+    responseDT[["image_path"]] <- .y
+
+    responseDT
+  }) %>%
+    data.table::rbindlist(fill = TRUE) %>%
+    data.table::setcolorder("image_path")
+}
+
+#' @title helper function code to extract error from API response into a data.table
+#'
+#' @inheritParams gcv_get_image_annotations
+#' @param responses an API response object
+#'
+#' @return a data.table
+#'
+extract_error <- function(responses, imagePaths) {
+  data.table(
+    image_path = imagePaths,
+    error_code = responses[["error"]][["code"]],
+    error_message = responses[["error"]][["message"]]
+  )
 }
 
 #' @title helper function code to record available feature types
@@ -221,22 +254,20 @@ get_feature_types <- function() {
 #' @title helper function code to provide an extractor function for different feature types
 #' @description a utility to provide functions to extract features from the API response
 #'
-#' @inheritParams gcv_get_image_annotations
+#' @inheritParams extract_annotations
 #'
 #' @return a function
 #'
-extractor <- function(feature) {
-  if (feature == "LABEL_DETECTION") {
+extractor <- function(feature_type) {
+  if (feature_type == "labelAnnotations") {
     label_detection_extractor
-  } else if (feature == "TEXT_DETECTION") {
-    text_detection_extractor
-  } else if (feature == "DOCUMENT_TEXT_DETECTION") {
-    document_text_detection_extractor
-  } else if (feature == "FACE_DETECTION") {
+  } else if (feature_type == "textAnnotations") {
+    ocr_extractor
+  } else if (feature_type == "faceAnnotations") {
     face_detection_extractor
-  } else if (feature == "LOGO_DETECTION") {
+  } else if (feature_type == "logoAnnotations") {
     logo_detection_extractor
-  } else if (feature == "LANDMARK_DETECTION") {
+  } else if (feature_type == "landmarkAnnotations") {
     landmark_detection_extractor
   } else {
     stop("Unrecognized feature type")
@@ -267,17 +298,7 @@ label_detection_extractor <- function(response) {
 #'
 #' @return a data.table
 #'
-text_detection_extractor <- function(response) {
-  data.table::data.table(description = response[["description"]][1])
-}
-
-#' @title helper function code to extract API response into a data.table for given feature type
-#'
-#' @param response an element of the API response object
-#'
-#' @return a data.table
-#'
-document_text_detection_extractor <- function(response) {
+ocr_extractor <- function(response) {
   data.table::data.table(description = response[["description"]][1])
 }
 

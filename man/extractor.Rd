@@ -4,11 +4,10 @@
 \alias{extractor}
 \title{helper function code to provide an extractor function for different feature types}
 \usage{
-extractor(feature)
+extractor(feature_type)
 }
 \arguments{
-\item{feature}{character, one out of: "LABEL_DETECTION", "FACE_DETECTION",
-"TEXT_DETECTION", "DOCUMENT_TEXT_DETECTION", "LOGO_DETECTION", "LANDMARK_DETECTION"}
+\item{feature_type}{the type of annotation as called in the response object}
 }
 \value{
 a function

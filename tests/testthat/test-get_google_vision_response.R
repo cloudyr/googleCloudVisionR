@@ -1,3 +1,5 @@
+source("test-utils.R")
+
 context("Input validation")
 
 test_that("it throws informative exceptions for invalid imagePaths", {
@@ -68,21 +70,61 @@ test_that("it does not call API when cached result is available", {
   mockery::expect_called(gcvGetResponseMock, 0)
 })
 
-# context("Google Vision API")
-# 
-# test_that("handles case of non-image URL", {
-#   callVisionAPIMock <- mockery::mock(
-#     list(content = list(responses = data.frame(error = data.frame(code = 3, message = "Nice error message."))))
-#   )
-#   mockery::stub(gcv_get_image_annotations, "call_vision_api", callVisionAPIMock, depth = 2)
-#   
-#   expect_error(
-#     gcv_get_image_annotations("http://non-image-url"),
-#     "Google API returned an error: Nice error message."
-#   )
-# })
-# 
-# create_response <- function(numAnnotations = 0, numErrorrs = 0) {
-#   errors 
-#   list(content = list(responses = data.frame(error = data.frame(code = 3, message = "Nice error message."))))
-# }
+context("Google Vision API")
+
+test_that("handles case of non-image URL", {
+  expected_response <- create_response(FALSE)
+  callVisionAPIMock <- mockery::mock(
+    list(content = list(responses = expected_response))
+  )
+  mockery::stub(gcv_get_response, "call_vision_api", callVisionAPIMock)
+  # depth = 2 fails on devtools::check(), so we are not mocking the public function
+
+  expect_equal(
+    gcv_get_response("http://non-image-url", feature = "LABEL_DETECTION", maxNumResults = NULL)[, .(error_code, error_message)],
+    data.table(error_code = 3, error_message = "Nice error message.")
+  )
+})
+
+test_that("handles successful responses with LABEL_DETECTION", {
+  expected_response <- create_response(TRUE)
+  callVisionAPIMock <- mockery::mock(
+    list(content = list(responses = expected_response))
+  )
+  mockery::stub(gcv_get_response, "call_vision_api", callVisionAPIMock)
+  # depth = 2 fails on devtools::check(), so we are not mocking the public function
+
+  expect_equal(
+    gcv_get_response("http://image-url", feature = "LABEL_DETECTION", maxNumResults = NULL),
+    data.table(
+      image_path = "http://image-url",
+      mid = "foo",
+      description = "bar",
+      score = 0.987
+    )
+  )
+})
+
+test_that("handles mixed successes and errors", {
+  expected_response <- create_response(c(TRUE, FALSE))
+  callVisionAPIMock <- mockery::mock(
+    list(content = list(responses = expected_response))
+  )
+  mockery::stub(gcv_get_response, "call_vision_api", callVisionAPIMock)
+  # depth = 2 fails on devtools::check(), so we are not mocking the public function
+
+  expect_equal(
+    gcv_get_response(
+      c("http://image-url", "http://non-image-url"),
+      feature = "LABEL_DETECTION", maxNumResults = NULL
+    ),
+    data.table(
+      image_path = c("http://image-url", "http://non-image-url"),
+      mid = c("foo", NA),
+      description = c("bar", NA),
+      score = c(0.987, NA),
+      error_code = c(NA, 3),
+      error_message = c(NA, "Nice error message.")
+    )
+  )
+})

@@ -10,12 +10,13 @@
 This is a wrapper for Google's Cloud Vision API.
 }
 \author{
-\strong{Maintainer}: Florian Teschner \email{teschner@gmail.com}
+\strong{Maintainer}: Jeno Pal \email{paljenczy@gmail.com}
 
-Other contributors:
+Authors:
 \itemize{
-  \item Jeno Pal \email{paljenczy@gmail.com} [contributor]
-  \item Tamas Koncz \email{t.koncz@gmail.com} [contributor]
+  \item Tamas Koncz \email{t.koncz@gmail.com}
+  \item Balazs Varkoly \email{varkoly.balazs@gmail.com}
+  \item Florian Teschner \email{teschner@gmail.com}
 }
 
 }

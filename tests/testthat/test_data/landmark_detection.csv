@@ -1,0 +1,3 @@
+image_path,mid,description,score,x,y,latitude,longitude
+../../inst/extdata/notre-dame.jpg,/m/0gtxh,Notre Dame de Paris,0.93541706,"148, 376, 376, 148","43, 43, 285, 285",48.853096,2.349113
+../../inst/extdata/notre-dame.jpg,/m/02j81,Paris,0.79185456,"168, 329, 329, 168","43, 43, 285, 285",48.858546,2.322242

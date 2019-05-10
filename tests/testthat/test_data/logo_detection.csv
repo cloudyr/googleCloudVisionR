@@ -1,0 +1,4 @@
+image_path,mid,description,score,x,y
+../../inst/extdata/brandlogos.png,/m/03tb1,ikea,0.98375,"700, 842, 842, 700","219, 219, 270, 270"
+../../inst/extdata/brandlogos.png,/m/02zs4,ford,0.972575,"823, 928, 928, 823","83, 83, 123, 123"
+../../inst/extdata/brandlogos.png,/m/019rl6,yahoo,0.95405,"267, 456, 456, 267","155, 155, 196, 196"

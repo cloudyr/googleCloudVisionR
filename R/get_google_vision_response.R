@@ -156,8 +156,8 @@ create_single_image_request <- function(imagePath, feature, maxNumResults) {
 #' @return get the image back as encoded file
 #'
 encode_image <- function(imagePath) {
-  RCurl::base64Encode(readBin(
-      imagePath, "raw", file.info(imagePath)[1, "size"]), "txt"
+  caTools::base64encode(
+    readBin(imagePath, "raw", file.info(imagePath)[1, "size"])
   )
 }
 

@@ -186,7 +186,6 @@ call_vision_api <- function(body) {
 #' @return a data.table
 #'
 extract_response <- function(responses, imagePaths, feature){
-
   feature_type <- get_feature_types()[[feature]]
   errors <- data.table(image_path = imagePaths)
   annotations  <- data.table(image_path = imagePaths)
@@ -313,11 +312,11 @@ face_detection_extractor <- function(response) {
 
   cbind(
     boundingBoxes,
-    data.table::as.data.table(response) %>%
-      .[, c("detectionConfidence", "landmarkingConfidence", "joyLikelihood",
+    data.table::as.data.table(response[,
+          c("detectionConfidence", "landmarkingConfidence", "joyLikelihood",
             "sorrowLikelihood", "angerLikelihood", "surpriseLikelihood",
             "underExposedLikelihood", "blurredLikelihood", "headwearLikelihood")
-       ]
+       ])
   )
 }
 
@@ -331,7 +330,7 @@ logo_detection_extractor <- function(response) {
   boundingBoxes <- getBoundingBoxes(response)
 
   cbind(
-    data.table::as.data.table(response)[, c("mid", "description", "score")],
+    data.table::as.data.table(response[, c("mid", "description", "score")]),
     boundingBoxes
   )
 }

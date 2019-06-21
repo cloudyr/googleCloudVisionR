@@ -1,6 +1,6 @@
 # googleCloudVisionR
-[![Travis build status](https://travis-ci.org/emartech/googleCloudVisionR.svg?branch=master)](https://travis-ci.org/emartech/googleCloudVisionR)
-[![Codecov test coverage](https://codecov.io/gh/emartech/googleCloudVisionR/branch/master/graph/badge.svg)](https://codecov.io/gh/emartech/googleCloudVisionR?branch=master)
+[![Travis build status](https://travis-ci.org/cloudyr/googleCloudVisionR.svg?branch=master)](https://travis-ci.org/cloudyr/googleCloudVisionR)
+[![Codecov test coverage](https://codecov.io/gh/cloudyr/googleCloudVisionR/branch/master/graph/badge.svg)](https://codecov.io/gh/cloudyr/googleCloudVisionR?branch=master)
 
 R Package for Image Recognition, Object Detection, and OCR using the Google's Cloud Vision API.
 

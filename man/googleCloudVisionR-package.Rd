@@ -16,7 +16,7 @@ Authors:
 \itemize{
   \item Tamas Koncz \email{t.koncz@gmail.com}
   \item Balazs Varkoly \email{varkoly.balazs@gmail.com}
-  \item Florian Teschner \email{teschner@gmail.com}
+  \item Eszter Kocsis \email{p.kocsis.eszter@gmail.com}
 }
 
 }

@@ -16,7 +16,7 @@ This package allows you to call the following functionalities: label, text, land
 
 The project is a continuation of the [RoogleVision](https://github.com/cloudyr/RoogleVision) package
 by Florian Teschner and is relying on the authentication procedures offered by
-[googleAuthR](https://cran.r-project.org/web/packages/googleAuthR/index.html).
+[googleAuthR](https://CRAN.R-project.org/package=googleAuthR).
 
 **WARNING**: the project is in active development and is not guaranteed to be stable in terms of
 function names, signatures, etc. Contributions through issues, pull requests are more than
@@ -41,7 +41,7 @@ Sys.setenv("GCV_AUTH_FILE" = "/fullpath/to/auth.json")
 ```
 
 This can alternatively be set on the command line or via an `Renviron.site` or
-`.Renviron` file (see [here](https://cran.r-project.org/web/packages/httr/vignettes/api-packages.html) for instructions).
+`.Renviron` file (see [here](https://CRAN.R-project.org/package=httr/vignettes/api-packages.html) for instructions).
 
 If this is set, upon loading the package authentication happens
 automatically.

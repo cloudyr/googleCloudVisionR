@@ -25,7 +25,13 @@ welcome.
 
 ## Installation
 
-The package is not yet on CRAN. You can install the package directly from Github:
+v0.1.0 is already available on CRAN, you can install it with:
+```r
+install.packages("googleCloudVisionR")
+```
+
+
+If you need the latest version, just install the package directly from Github:
 ``` r
 devtools::install_github("cloudyr/googleCloudVisionR")
 ```

@@ -4,10 +4,11 @@
 \name{googleCloudVisionR-package}
 \alias{googleCloudVisionR}
 \alias{googleCloudVisionR-package}
-\title{googleCloudVisionR: Access to Google's Cloud Vision API for Image Recognition, OCR and
+\title{googleCloudVisionR: Access to 'Google Cloud Vision' API for Image Recognition, OCR and
     Labeling}
 \description{
-This is a wrapper for Google's Cloud Vision API.
+Interact with 'Google Cloud Vision' <https://cloud.google.com/vision/>
+  API in R. Part of the 'cloudyr' <https://cloudyr.github.io/> project.
 }
 \author{
 \strong{Maintainer}: Jeno Pal \email{paljenczy@gmail.com}
@@ -17,6 +18,11 @@ Authors:
   \item Tamas Koncz \email{t.koncz@gmail.com}
   \item Balazs Varkoly \email{varkoly.balazs@gmail.com}
   \item Eszter Kocsis \email{p.kocsis.eszter@gmail.com}
+}
+
+Other contributors:
+\itemize{
+  \item Florian Teschner [contributor]
 }
 
 }

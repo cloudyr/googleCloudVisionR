@@ -2,6 +2,14 @@
 
 This is a resubmission. In this version I have:
 
+* added single quotes around API names in Title and Description
+* added links for webservices in Description
+* added Florian Teschner as 'ctb' to align Authors@R with the LICENSE
+
+## Resubmission
+
+This is a resubmission. In this version I have:
+
 * fixed CRAN URLs to have the canonical format
 * fixed the LICENSE format to the CRAN template for the MIT license
 * removed the VignetteBuilder field from DESCRIPTION as we do not yet have vignettes

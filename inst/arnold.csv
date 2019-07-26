@@ -1,0 +1,7 @@
+image_path,mid,description,score,feature
+inst/extdata/arnold_wife.jpg,/m/0dgw9r,Human,0.7467646,LABEL_DETECTION
+inst/extdata/arnold_wife.jpg,/m/01kq3x,White-collar worker,0.7242806,LABEL_DETECTION
+inst/extdata/arnold_wife.jpg,/m/081pkj,Event,0.710556,LABEL_DETECTION
+inst/extdata/arnold_wife.jpg,/m/019nj4,Smile,0.6944891,LABEL_DETECTION
+inst/extdata/arnold_wife.jpg,/m/01xyhv,Suit,0.5326484,LABEL_DETECTION
+inst/extdata/arnold_wife.jpg,/m/02hrh1q,Actor,0.50506055,LABEL_DETECTION

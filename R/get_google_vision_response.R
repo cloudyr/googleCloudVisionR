@@ -43,31 +43,38 @@ gcv_get_image_annotations <- function(imagePaths, feature = "LABEL_DETECTION",
     stop(paste0("Invalid feature: ", feature, " - it should be one of: ",
       paste0(paste0("'", names(get_feature_types()), "'"), collapse = ", ")))
   }
-  annotatedImagePaths <- ""
-  if(!is.null(savePath) && file.exists(savePath)) {
-    annotationsFromFile <- data.table::fread(savePath)
-    annotatedImagePaths <- unique(annotationsFromFile[["image_path"]])
+  
+  if(is.null(savePath) || !file.exists(savePath)) {
+      imagePathChunks <- split_to_chunks(imagePaths, batchSize)
+      imageAnnotations <- purrr::map(imagePathChunks, ~{
+          gcvResponse <- gcv_get_response(.x, feature, maxNumResults)
+          if (!is.null(savePath)) {
+              data.table::fwrite(cbind(gcvResponse, data.table(feature = feature)), savePath, append = TRUE)
+          }
+      }) %>% rbindlist()
+      return(imageAnnotations)
   }
-  imagesToAnnotate <- unique(setdiff(imagePaths, annotatedImagePaths))
+
+  featureTypeInCache <- data.table::fread(savePath) %>% .[1, feature]
+  if(featureTypeInCache != feature) {
+      warning(glue::glue("{savePath} was already used for {cache_feature_type} feature type."))
+      imagesToAnnotate <- imagePaths
+  } else {
+      annotationsFromFile <- data.table::fread(savePath)
+      annotatedImagePaths <- unique(annotationsFromFile[["image_path"]])
+      imagesToAnnotate <- unique(setdiff(imagePaths, annotatedImagePaths))   
+  }
 
   if(length(imagesToAnnotate) > 0) {
-    imagePathChunks <- split_to_chunks(imagesToAnnotate, batchSize)
-    imageAnnotations <- purrr::map(imagePathChunks, ~{
-      gcvResponse <- gcv_get_response(.x, feature, maxNumResults)
-
-      if(!is.null(savePath)) data.table::fwrite(gcvResponse, savePath, append = TRUE)
-
-      gcvResponse
-    }) %>% data.table::rbindlist(fill = TRUE)
+      imagePathChunks <- split_to_chunks(imagesToAnnotate, batchSize)
+      purrr::walk(imagePathChunks, ~{
+          gcvResponse <- gcv_get_response(.x, feature, maxNumResults)
+          if (!is.null(savePath)) {
+              data.table::fwrite(cbind(gcvResponse, data.table(feature = feature)), savePath, append = TRUE)
+          }
+      })
   }
-
-  if(exists("annotationsFromFile") && exists("imageAnnotations")) {
-    rbind(annotationsFromFile, imageAnnotations)
-  } else if (exists("annotationsFromFile")) {
-    annotationsFromFile
-  } else {
-    imageAnnotations
-  }
+  data.table::fread(savePath)[image_path %in% imagePaths, feature := NULL]
 }
 
 #' @title helper function to validate input image paths

@@ -40,11 +40,14 @@ test_that("API request is sent with all valid feature parameters", {
 context("Cached annotations")
 
 test_that("it calls API based on cached results", {
+  savePath <- "annotated_images.csv"
+  data.table::fwrite(data.table::data.table(
+      image_path = "annotated_image.jpg", feature = "LABEL_DETECTION"), savePath)
   imagePaths <- list(
     "image_not_yet_annotated.jpg",
     c("annotated_image.jpg", "image_not_yet_annotated.jpg")
   )
-  savePaths <- list(NULL, "annotated_images.csv")
+  savePaths <- list(NULL, savePath)
   expectedCallArgs <- c(
     "image_not_yet_annotated.jpg",
     "image_not_yet_annotated.jpg"
@@ -59,15 +62,34 @@ test_that("it calls API based on cached results", {
 
   call_args <- mockery::mock_args(gcvGetResponseMock)
   expect_equal(purrr::map_chr(call_args, 1), expectedCallArgs)
+  file.remove(savePath)
 })
 
 test_that("it does not call API when cached result is available", {
+  savePath <- "annotated_images.csv"
+  data.table::fwrite(data.table::data.table(
+    image_path = "annotated_image.jpg", feature = "LABEL_DETECTION"), savePath)
   gcvGetResponseMock <- mockery::mock()
   mockery::stub(gcv_get_image_annotations, "gcv_get_response", gcvGetResponseMock)
 
-  gcv_get_image_annotations("annotated_image.jpg", savePath = "annotated_images.csv")
+  gcv_get_image_annotations("annotated_image.jpg", savePath = savePath)
 
   mockery::expect_called(gcvGetResponseMock, 0)
+  file.remove(savePath)
+})
+
+test_that("it stores feature type in cache", {
+    testSavePath <- "test.csv"
+    gcvGetResponseMock <- mockery::mock(data.table::data.table(column1 = 1))
+    mockery::stub(gcv_get_image_annotations, "gcv_get_response", gcvGetResponseMock)
+    
+    gcv_get_image_annotations("annotated_image.jpg", feature = "LABEL_DETECTION", savePath = testSavePath)
+    cache <- data.table::fread(testSavePath)
+    
+    expect_equal(names(cache), c("column1", "feature"))
+    expect_equal(cache[1, feature], "LABEL_DETECTION")
+    
+    file.remove(testSavePath)
 })
 
 context("Google Vision API")

@@ -10,6 +10,13 @@
 Interact with 'Google Cloud Vision' <https://cloud.google.com/vision/>
   API in R. Part of the 'cloudyr' <https://cloudyr.github.io/> project.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item Report bugs at \url{https://github.com/cloudyr/googleCloudVisionR/issues}
+}
+
+}
 \author{
 \strong{Maintainer}: Jeno Pal \email{paljenczy@gmail.com}
 

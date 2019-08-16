@@ -45,18 +45,15 @@ gcv_get_image_annotations <- function(imagePaths, feature = "LABEL_DETECTION",
     }
 
     if(is.null(savePath) || !file.exists(savePath)) {
-        imagePathChunks <- split_to_chunks(imagePaths, batchSize)
-        imageAnnotations <- purrr::map(imagePathChunks, ~{
-            gcvResponse <- gcv_get_response(.x, feature, maxNumResults)
-            if (!is.null(savePath)) {
-                data.table::fwrite(cbind(gcvResponse, data.table(feature = feature)), savePath, append = TRUE)
-            }
-        }) %>% rbindlist()
-        return(imageAnnotations)
+        imageAnnotations <- gcv_get_and_cache_response(
+            imagePaths, batchSize, feature, maxNumResults, savePath
+        )
+        return(imageAnnotations)  # Early return
     }
 
     featureTypeInCache <- data.table::fread(savePath) %>% .[1, feature]
     if(featureTypeInCache != feature) {
+        # TODO: warning or error??
         warning(glue::glue("{savePath} was already used for {cache_feature_type} feature type."))
         imagesToAnnotate <- imagePaths
     } else {
@@ -66,16 +63,35 @@ gcv_get_image_annotations <- function(imagePaths, feature = "LABEL_DETECTION",
     }
 
     if(length(imagesToAnnotate) > 0) {
-        imagePathChunks <- split_to_chunks(imagesToAnnotate, batchSize)
-        purrr::walk(imagePathChunks, ~{
-            gcvResponse <- gcv_get_response(.x, feature, maxNumResults)
-            if (!is.null(savePath)) {
-                data.table::fwrite(cbind(gcvResponse, data.table(feature = feature)), savePath, append = TRUE)
-            }
-        })
+        imageAnnotations <- gcv_get_and_cache_response(
+            imagesToAnnotate, batchSize, feature, maxNumResults, savePath
+        )
+        return(rbind(annotationsFromFile, imageAnnotations))
+    } else {
+        annotationsFromFile[image_path %in% imagePaths]
     }
-    data.table::fread(savePath)[image_path %in% imagePaths, feature := NULL]
 }
+
+gcv_get_and_cache_response <- function(imagesToAnnotate,
+                                       batchSize,
+                                       feature,
+                                       maxNumResults,
+                                       savePath) {
+    imagePathChunks <- split_to_chunks(imagesToAnnotate, batchSize)
+    imageAnnotations <- purrr::map(imagePathChunks, ~{
+        gcvResponse <- cbind(
+            gcv_get_response(.x, feature, maxNumResults),
+            data.table(feature = feature)
+        )
+
+        if (!is.null(savePath)) {
+            data.table::fwrite(gcvResponse, savePath, append = TRUE)
+        }
+
+        gcvResponse
+    }) %>% rbindlist()
+}
+
 
 #' @title helper function to validate input image paths
 #'

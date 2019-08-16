@@ -4,7 +4,7 @@ context("Input validation")
 
 test_that("it throws informative exceptions for invalid imagePaths", {
     gcvGetAndCacheResponseMock <- mockery::mock()
-    mockery::stub(gcv_get_image_annotations, "gcv_get_and_cache_response", gcvGetAndCacheResponseMock)
+    mockery::stub(gcv_get_image_annotations, "gcv_read_response", gcvGetAndCacheResponseMock)
     invalidInputs <- list("", "foo", c("bar", "baz"), c("https://bit.ly/2IhUzdE", "qux"), c("gs://vision-api-handwriting-ocr-bucket/handwriting_image.png", "quux"))
     expectedOutputs <- list("", "foo", c("bar", "baz"), "qux", "quux")
 
@@ -18,7 +18,7 @@ test_that("it throws informative exceptions for invalid imagePaths", {
 })
 
 test_that("it throws informative exceptions if invalid feature parameter is provided", {
-    mockery::stub(gcv_get_image_annotations, "gcv_get_and_cache_response", mockery::mock())
+    mockery::stub(gcv_get_image_annotations, "gcv_read_response", mockery::mock())
     invalidFeature <- "foobarbaz"
     expect_error(
         gcv_get_image_annotations("https://bit.ly/2IhUzdE", feature = invalidFeature),
@@ -30,7 +30,7 @@ test_that("it throws informative exceptions if invalid feature parameter is prov
 
 test_that("API request is sent w/o error if valid feature parameters are provided", {
     gcvGetResponseMock <- mockery::mock()
-    mockery::stub(gcv_get_image_annotations, "gcv_get_and_cache_response", gcvGetResponseMock)
+    mockery::stub(gcv_get_image_annotations, "gcv_read_response", gcvGetResponseMock)
 
     validFeatures <- c("LABEL_DETECTION", "TEXT_DETECTION", "DOCUMENT_TEXT_DETECTION",
                        "FACE_DETECTION", "LOGO_DETECTION", "LANDMARK_DETECTION")
@@ -60,7 +60,7 @@ test_that("it calls API only on not yet cached results", {
     )
 
     gcvGetAndCacheResponseMock <- mockery::mock(data.table(), cycle = TRUE)
-    mockery::stub(gcv_get_image_annotations, "gcv_get_and_cache_response", gcvGetAndCacheResponseMock)
+    mockery::stub(gcv_get_image_annotations, "gcv_read_response", gcvGetAndCacheResponseMock)
 
     purrr::walk2(imagePaths, savePaths, ~{
         suppressWarnings(gcv_get_image_annotations(.x, savePath = .y))
@@ -78,7 +78,7 @@ test_that("it does not call API when cached result is available", {
         savePath
     )
     gcvGetAndCacheResponseMock <- mockery::mock()
-    mockery::stub(gcv_get_image_annotations, "gcv_get_and_cache_response", gcvGetAndCacheResponseMock)
+    mockery::stub(gcv_get_image_annotations, "gcv_read_response", gcvGetAndCacheResponseMock)
 
     gcv_get_image_annotations("annotated_image.jpg", savePath = savePath)
 
@@ -87,10 +87,10 @@ test_that("it does not call API when cached result is available", {
 })
 
 test_that("it creates cache when savePath is provided and cache doesn't exist yet", {
-    gcvGetResponseMock <- mockery::mock(data.table(column1 = 1))
-    mockery::stub(gcv_get_and_cache_response, "gcv_get_response", gcvGetResponseMock)
+    gcvGetResponseMock <- mockery::mock(data.table(column1 = 1, feature = "LABEL_DETECTION"))
+    mockery::stub(gcv_read_response, "gcv_get_response", gcvGetResponseMock)
 
-    gcv_get_and_cache_response(
+    gcv_read_response(
         "annotated_image.jpg", 1, feature = "LABEL_DETECTION", 1, "test.csv"
     )
 
@@ -105,10 +105,10 @@ test_that("it creates cache when savePath is provided and cache doesn't exist ye
 test_that("it stores feature type in cache", {
     testSavePath <- "test.csv"
     # testing lower level function b/c mockery's depth param doesn't work with devtools::check
-    gcvGetResponseMock <- mockery::mock(data.table(column1 = 1))
-    mockery::stub(gcv_get_and_cache_response, "gcv_get_response", gcvGetResponseMock)
+    gcvGetResponseMock <- mockery::mock(data.table(column1 = 1, feature = "LABEL_DETECTION"))
+    mockery::stub(gcv_read_response, "gcv_get_response", gcvGetResponseMock)
 
-    gcv_get_and_cache_response(
+    gcv_read_response(
         "annotated_image.jpg", 1, feature = "LABEL_DETECTION", 1, testSavePath
     )
     cache <- fread(testSavePath)
@@ -164,7 +164,9 @@ test_that("handles successful responses with LABEL_DETECTION", {
             image_path = "http://image-url",
             mid = "foo",
             description = "bar",
-            score = 0.987
+            score = 0.987,
+            topicality = 0.987,
+            feature = "LABEL_DETECTION"
         )
     )
 })
@@ -187,8 +189,10 @@ test_that("handles mixed successes and errors", {
             mid = c("foo", NA),
             description = c("bar", NA),
             score = c(0.987, NA),
+            topicality = c(0.987, NA),
             error_code = c(NA, 3),
-            error_message = c(NA, "Nice error message.")
+            error_message = c(NA, "Nice error message."),
+            feature = rep("LABEL_DETECTION", 2)
         )
     )
 })

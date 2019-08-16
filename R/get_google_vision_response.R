@@ -34,36 +34,24 @@
 gcv_get_image_annotations <- function(imagePaths, feature = "LABEL_DETECTION",
                                       maxNumResults = NULL, batchSize = 64L,
                                       savePath = NULL) {
-    invalid_paths <- get_invalid_image_paths(imagePaths)
-    if (length(invalid_paths) > 0) {
-        stop(paste0("Invalid elements in imagePath: ", paste(invalid_paths, collapse = " ")))
-    }
-
-    if (!(feature %in% names(get_feature_types()))) {
-        stop(paste0("Invalid feature: ", feature, " - it should be one of: ",
-            paste0(paste0("'", names(get_feature_types()), "'"), collapse = ", ")))
-    }
+    validate_image_paths(imagePaths)
+    validate_feature(feature)
 
     if (is.null(savePath) || !file.exists(savePath)) {
-        imageAnnotations <- gcv_get_and_cache_response(
+        imageAnnotations <- gcv_read_response(
             imagePaths, batchSize, feature, maxNumResults, savePath
         )
         return(imageAnnotations)  # Early return
     }
 
-    featureTypeInCache <- data.table::fread(savePath) %>% .[1, feature]
-    if (featureTypeInCache != feature) {
-        stop(glue::glue(
-            "{savePath} was already used for '{featureTypeInCache}' feature type,",
-            "thus inconsistent with the now requested type ('{feature}')."
-        ))
-    }
+    validate_feature_consistency_with_cache(savePath, feature)
 
     annotationsFromFile <- data.table::fread(savePath)
     annotatedImagePaths <- unique(annotationsFromFile[["image_path"]])
     imagesToAnnotate <- unique(setdiff(imagePaths, annotatedImagePaths))
+
     if (length(imagesToAnnotate) > 0) {
-        imageAnnotations <- gcv_get_and_cache_response(
+        imageAnnotations <- gcv_read_response(
             imagesToAnnotate, batchSize, feature, maxNumResults, savePath
         )
         return(rbind(annotationsFromFile, imageAnnotations))
@@ -72,34 +60,19 @@ gcv_get_image_annotations <- function(imagePaths, feature = "LABEL_DETECTION",
     }
 }
 
-gcv_get_and_cache_response <- function(imagesToAnnotate,
-                                       batchSize,
-                                       feature,
-                                       maxNumResults,
-                                       savePath) {
+gcv_read_response <- function(imagesToAnnotate,
+                              batchSize,
+                              feature,
+                              maxNumResults,
+                              savePath) {
     imagePathChunks <- split_to_chunks(imagesToAnnotate, batchSize)
     purrr::map(imagePathChunks, ~{
-        gcvResponse <- cbind(
-            gcv_get_response(.x, feature, maxNumResults),
-            data.table(feature = feature)
-        )
+        gcvResponse <- gcv_get_response(.x, feature, maxNumResults)
         if (!is.null(savePath)) {
             data.table::fwrite(gcvResponse, savePath, append = TRUE)
         }
         gcvResponse
     }) %>% rbindlist()
-}
-
-
-#' @title helper function to validate input image paths
-#'
-#' @param vec a vector of paths
-#'
-#' @return vector of invalid paths from @vec
-#'
-get_invalid_image_paths <- function(vec) {
-    is_valid <- purrr::map_lgl(vec, ~{(grepl("^(http|https|gs)://", .x)) || file.exists(.x)})
-    vec[!is_valid]
 }
 
 #' @title helper function to split a vector to approximately equally sized chunks
@@ -126,7 +99,7 @@ gcv_get_response <- function(imagePaths, feature, maxNumResults){
         rawResponse[["content"]][["responses"]],
         imagePaths,
         feature
-    )
+    ) %>% .[, feature := feature]
 }
 
 #' @title helper function to create json for response request
@@ -301,10 +274,11 @@ label_detection_extractor <- function(response) {
         data.table::data.table(
             mid         = NA_character_,
             description = NA_character_,
-            score       = NA
+            score       = NA,
+            topicality  = NA
         )
     } else {
-        data.table::as.data.table(response)[, c("mid", "description", "score")]
+        data.table::as.data.table(response)[, c("mid", "description", "score", "topicality")]
     }
 }
 

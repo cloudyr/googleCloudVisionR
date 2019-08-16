@@ -61,7 +61,7 @@ library(googleCloudVisionR)
 ## Example
 
 Let us retrieve annotations for this image:
-![](inst/extdata/golden_retriever_puppies.jpg)
+![](man/figures/golden_retriever_puppies.jpg)
 
 Label detection (default), with maximum 7 results returned per image:
 

@@ -86,6 +86,22 @@ test_that("it does not call API when cached result is available", {
     file.remove(savePath)
 })
 
+test_that("it creates cache when savePath is provided and cache doesn't exist yet", {
+    gcvGetResponseMock <- mockery::mock(data.table(column1 = 1))
+    mockery::stub(gcv_get_and_cache_response, "gcv_get_response", gcvGetResponseMock)
+
+    gcv_get_and_cache_response(
+        "annotated_image.jpg", 1, feature = "LABEL_DETECTION", 1, "test.csv"
+    )
+
+    expect_equal(
+        data.table(column1 = 1, feature = "LABEL_DETECTION"),
+        fread("test.csv")
+    )
+
+    file.remove("test.csv")
+})
+
 test_that("it stores feature type in cache", {
     testSavePath <- "test.csv"
     # testing lower level function b/c mockery's depth param doesn't work with devtools::check
@@ -100,6 +116,19 @@ test_that("it stores feature type in cache", {
     expect_equal(names(cache), c("column1", "feature"))
     expect_equal(cache[1, feature], "LABEL_DETECTION")
 
+    file.remove(testSavePath)
+})
+
+test_that("it throws error when provided feature type is inconsistent with existing cache", {
+    testSavePath <- "test.csv"
+    fwrite(data.table(feature = "LABEL_DETECTION"), testSavePath)
+
+    expect_error(
+        gcv_get_image_annotations(
+            "https://bit.ly/2IhUzdE", feature = "FACE_DETECTION", savePath = testSavePath
+        ),
+        glue::glue("{testSavePath} was already used for 'LABEL_DETECTION'")
+    )
     file.remove(testSavePath)
 })
 

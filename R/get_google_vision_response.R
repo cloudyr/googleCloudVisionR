@@ -35,7 +35,7 @@ gcv_get_image_annotations <- function(imagePaths, feature = "LABEL_DETECTION",
                                       maxNumResults = NULL, batchSize = 64L,
                                       savePath = NULL) {
     invalid_paths <- get_invalid_image_paths(imagePaths)
-    if(length(invalid_paths) > 0) {
+    if (length(invalid_paths) > 0) {
         stop(paste0("Invalid elements in imagePath: ", paste(invalid_paths, collapse = " ")))
     }
 
@@ -44,7 +44,7 @@ gcv_get_image_annotations <- function(imagePaths, feature = "LABEL_DETECTION",
             paste0(paste0("'", names(get_feature_types()), "'"), collapse = ", ")))
     }
 
-    if(is.null(savePath) || !file.exists(savePath)) {
+    if (is.null(savePath) || !file.exists(savePath)) {
         imageAnnotations <- gcv_get_and_cache_response(
             imagePaths, batchSize, feature, maxNumResults, savePath
         )
@@ -52,17 +52,17 @@ gcv_get_image_annotations <- function(imagePaths, feature = "LABEL_DETECTION",
     }
 
     featureTypeInCache <- data.table::fread(savePath) %>% .[1, feature]
-    if(featureTypeInCache != feature) {
-        # TODO: warning or error??
-        warning(glue::glue("{savePath} was already used for {cache_feature_type} feature type."))
-        imagesToAnnotate <- imagePaths
-    } else {
-        annotationsFromFile <- data.table::fread(savePath)
-        annotatedImagePaths <- unique(annotationsFromFile[["image_path"]])
-        imagesToAnnotate <- unique(setdiff(imagePaths, annotatedImagePaths))
+    if (featureTypeInCache != feature) {
+        stop(glue::glue(
+            "{savePath} was already used for '{featureTypeInCache}' feature type,",
+            "thus inconsistent with the now requested type ('{feature}')."
+        ))
     }
 
-    if(length(imagesToAnnotate) > 0) {
+    annotationsFromFile <- data.table::fread(savePath)
+    annotatedImagePaths <- unique(annotationsFromFile[["image_path"]])
+    imagesToAnnotate <- unique(setdiff(imagePaths, annotatedImagePaths))
+    if (length(imagesToAnnotate) > 0) {
         imageAnnotations <- gcv_get_and_cache_response(
             imagesToAnnotate, batchSize, feature, maxNumResults, savePath
         )
@@ -78,16 +78,14 @@ gcv_get_and_cache_response <- function(imagesToAnnotate,
                                        maxNumResults,
                                        savePath) {
     imagePathChunks <- split_to_chunks(imagesToAnnotate, batchSize)
-    imageAnnotations <- purrr::map(imagePathChunks, ~{
+    purrr::map(imagePathChunks, ~{
         gcvResponse <- cbind(
             gcv_get_response(.x, feature, maxNumResults),
             data.table(feature = feature)
         )
-
         if (!is.null(savePath)) {
             data.table::fwrite(gcvResponse, savePath, append = TRUE)
         }
-
         gcvResponse
     }) %>% rbindlist()
 }
@@ -161,7 +159,7 @@ create_single_image_request <- function(imagePath, feature, maxNumResults) {
     }
 
     features_in_request <- list(type = feature)
-    if(is.numeric(maxNumResults)) features_in_request[["maxResults"]] <- maxNumResults
+    if (is.numeric(maxNumResults)) features_in_request[["maxResults"]] <- maxNumResults
 
     list(
         image    = image_in_request,

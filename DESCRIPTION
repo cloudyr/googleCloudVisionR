@@ -8,6 +8,7 @@ Authors@R: c(
     person("Jeno", "Pal", email = "paljenczy@gmail.com", role = "cre"),
     person("Tamas", "Koncz", email = "t.koncz@gmail.com", role = "aut"),
     person("Balazs", "Varkoly", email = "varkoly.balazs@gmail.com", role = "aut"),
+    person("Peter", "Lukacs", email = "lukacs.peter.andras@gmail.com", role = "aut"),
     person("Eszter", "Kocsis", email = "p.kocsis.eszter@gmail.com",  role = "aut"),
     person("Florian", "Teschner",  role = "ctb"))
 BugReports: https://github.com/cloudyr/googleCloudVisionR/issues

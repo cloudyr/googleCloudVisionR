@@ -1,11 +1,11 @@
-image_path,mid,description,score
-../../inst/extdata/golden_retriever_puppies.jpg,/m/0bt9lr,Dog,0.9953705
-../../inst/extdata/golden_retriever_puppies.jpg,/m/04rky,Mammal,0.9890478
-../../inst/extdata/golden_retriever_puppies.jpg,/m/09686,Vertebrate,0.9851104
-../../inst/extdata/golden_retriever_puppies.jpg,/m/01z5f,Canidae,0.981378
-../../inst/extdata/golden_retriever_puppies.jpg,/m/0kpmf,Dog breed,0.968325
-../../inst/extdata/golden_retriever_puppies.jpg,/m/0d7s3w,Puppy,0.9400384
-../../inst/extdata/golden_retriever_puppies.jpg,/m/01t032,Golden retriever,0.8966703
-../../inst/extdata/golden_retriever_puppies.jpg,/m/0km3f,Labrador retriever,0.88851696
-../../inst/extdata/golden_retriever_puppies.jpg,/m/020xxc,Retriever,0.86563766
-../../inst/extdata/golden_retriever_puppies.jpg,/m/01lrl,Carnivore,0.8546947
+image_path,mid,description,score,feature
+../../inst/extdata/golden_retriever_puppies.jpg,/m/0bt9lr,Dog,0.9953705,LABEL_DETECTION
+../../inst/extdata/golden_retriever_puppies.jpg,/m/04rky,Mammal,0.9890478,LABEL_DETECTION
+../../inst/extdata/golden_retriever_puppies.jpg,/m/09686,Vertebrate,0.9851104,LABEL_DETECTION
+../../inst/extdata/golden_retriever_puppies.jpg,/m/01z5f,Canidae,0.981378,LABEL_DETECTION
+../../inst/extdata/golden_retriever_puppies.jpg,/m/0kpmf,Dog breed,0.968325,LABEL_DETECTION
+../../inst/extdata/golden_retriever_puppies.jpg,/m/0d7s3w,Puppy,0.9400384,LABEL_DETECTION
+../../inst/extdata/golden_retriever_puppies.jpg,/m/01t032,Golden retriever,0.8966703,LABEL_DETECTION
+../../inst/extdata/golden_retriever_puppies.jpg,/m/0km3f,Labrador retriever,0.88851696,LABEL_DETECTION
+../../inst/extdata/golden_retriever_puppies.jpg,/m/020xxc,Retriever,0.86563766,LABEL_DETECTION
+../../inst/extdata/golden_retriever_puppies.jpg,/m/01lrl,Carnivore,0.8546947,LABEL_DETECTION

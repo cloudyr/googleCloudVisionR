@@ -16,7 +16,8 @@ Imports:
     googleAuthR,
     jsonlite,
     purrr,
-    data.table
+    data.table,
+    glue
 License: MIT + file LICENSE
 LazyData: true
 RoxygenNote: 6.1.1

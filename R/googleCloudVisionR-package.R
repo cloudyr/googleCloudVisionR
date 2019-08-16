@@ -1,4 +1,4 @@
-utils::globalVariables(".")
+utils::globalVariables(c(".", "image_path"))
 
 #' @keywords internal
 #' @importFrom purrr %>%

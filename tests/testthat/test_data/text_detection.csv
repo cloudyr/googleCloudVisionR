@@ -1,3 +1,2 @@
-image_path,description
-../../inst/extdata/essex.jpg,"ESSEX
-"
+image_path,description,feature
+../../inst/extdata/essex.jpg,"ESSEX",TEXT_DETECTION

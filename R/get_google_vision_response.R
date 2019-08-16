@@ -34,41 +34,62 @@
 gcv_get_image_annotations <- function(imagePaths, feature = "LABEL_DETECTION",
                                       maxNumResults = NULL, batchSize = 64L,
                                       savePath = NULL) {
-  invalid_paths <- get_invalid_image_paths(imagePaths)
-  if(length(invalid_paths) > 0) {
-    stop(paste0("Invalid elements in imagePath: ", paste(invalid_paths, collapse = " ")))
-  }
+    invalid_paths <- get_invalid_image_paths(imagePaths)
+    if (length(invalid_paths) > 0) {
+        stop(paste0("Invalid elements in imagePath: ", paste(invalid_paths, collapse = " ")))
+    }
 
-  if (!(feature %in% names(get_feature_types()))) {
-    stop(paste0("Invalid feature: ", feature, " - it should be one of: ",
-      paste0(paste0("'", names(get_feature_types()), "'"), collapse = ", ")))
-  }
-  annotatedImagePaths <- ""
-  if(!is.null(savePath) && file.exists(savePath)) {
+    if (!(feature %in% names(get_feature_types()))) {
+        stop(paste0("Invalid feature: ", feature, " - it should be one of: ",
+            paste0(paste0("'", names(get_feature_types()), "'"), collapse = ", ")))
+    }
+
+    if (is.null(savePath) || !file.exists(savePath)) {
+        imageAnnotations <- gcv_get_and_cache_response(
+            imagePaths, batchSize, feature, maxNumResults, savePath
+        )
+        return(imageAnnotations)  # Early return
+    }
+
+    featureTypeInCache <- data.table::fread(savePath) %>% .[1, feature]
+    if (featureTypeInCache != feature) {
+        stop(glue::glue(
+            "{savePath} was already used for '{featureTypeInCache}' feature type,",
+            "thus inconsistent with the now requested type ('{feature}')."
+        ))
+    }
+
     annotationsFromFile <- data.table::fread(savePath)
     annotatedImagePaths <- unique(annotationsFromFile[["image_path"]])
-  }
-  imagesToAnnotate <- unique(setdiff(imagePaths, annotatedImagePaths))
-
-  if(length(imagesToAnnotate) > 0) {
-    imagePathChunks <- split_to_chunks(imagesToAnnotate, batchSize)
-    imageAnnotations <- purrr::map(imagePathChunks, ~{
-      gcvResponse <- gcv_get_response(.x, feature, maxNumResults)
-
-      if(!is.null(savePath)) data.table::fwrite(gcvResponse, savePath, append = TRUE)
-
-      gcvResponse
-    }) %>% data.table::rbindlist(fill = TRUE)
-  }
-
-  if(exists("annotationsFromFile") && exists("imageAnnotations")) {
-    rbind(annotationsFromFile, imageAnnotations)
-  } else if (exists("annotationsFromFile")) {
-    annotationsFromFile
-  } else {
-    imageAnnotations
-  }
+    imagesToAnnotate <- unique(setdiff(imagePaths, annotatedImagePaths))
+    if (length(imagesToAnnotate) > 0) {
+        imageAnnotations <- gcv_get_and_cache_response(
+            imagesToAnnotate, batchSize, feature, maxNumResults, savePath
+        )
+        return(rbind(annotationsFromFile, imageAnnotations))
+    } else {
+        annotationsFromFile[image_path %in% imagePaths]
+    }
 }
+
+gcv_get_and_cache_response <- function(imagesToAnnotate,
+                                       batchSize,
+                                       feature,
+                                       maxNumResults,
+                                       savePath) {
+    imagePathChunks <- split_to_chunks(imagesToAnnotate, batchSize)
+    purrr::map(imagePathChunks, ~{
+        gcvResponse <- cbind(
+            gcv_get_response(.x, feature, maxNumResults),
+            data.table(feature = feature)
+        )
+        if (!is.null(savePath)) {
+            data.table::fwrite(gcvResponse, savePath, append = TRUE)
+        }
+        gcvResponse
+    }) %>% rbindlist()
+}
+
 
 #' @title helper function to validate input image paths
 #'
@@ -77,8 +98,8 @@ gcv_get_image_annotations <- function(imagePaths, feature = "LABEL_DETECTION",
 #' @return vector of invalid paths from @vec
 #'
 get_invalid_image_paths <- function(vec) {
-  is_valid <- purrr::map_lgl(vec, ~{(grepl("^(http|https|gs)://", .x)) || file.exists(.x)})
-  vec[!is_valid]
+    is_valid <- purrr::map_lgl(vec, ~{(grepl("^(http|https|gs)://", .x)) || file.exists(.x)})
+    vec[!is_valid]
 }
 
 #' @title helper function to split a vector to approximately equally sized chunks
@@ -89,7 +110,7 @@ get_invalid_image_paths <- function(vec) {
 #' @return a list of chunks
 #'
 split_to_chunks <- function(vec, chunkSize) {
-  suppressWarnings(split(vec, ceiling(seq_along(vec) / chunkSize)))
+    suppressWarnings(split(vec, ceiling(seq_along(vec) / chunkSize)))
 }
 
 #' @title helper function to call the API for one batch of images
@@ -99,14 +120,13 @@ split_to_chunks <- function(vec, chunkSize) {
 #' @return a data frame with image annotation results
 #'
 gcv_get_response <- function(imagePaths, feature, maxNumResults){
-
-  body <- create_request_body(imagePaths, feature, maxNumResults)
-  rawResponse <- call_vision_api(body)
-  extract_response(
-    rawResponse[["content"]][["responses"]],
-    imagePaths,
-    feature
-  )
+    body <- create_request_body(imagePaths, feature, maxNumResults)
+    rawResponse <- call_vision_api(body)
+    extract_response(
+        rawResponse[["content"]][["responses"]],
+        imagePaths,
+        feature
+    )
 }
 
 #' @title helper function to create json for response request
@@ -117,10 +137,10 @@ gcv_get_response <- function(imagePaths, feature, maxNumResults){
 #' @return request body (payload), encoded as json
 #'
 create_request_body <- function(imagePaths, feature, maxNumResults) {
-  imageRequests <- purrr::map(imagePaths, create_single_image_request, feature, maxNumResults)
+    imageRequests <- purrr::map(imagePaths, create_single_image_request, feature, maxNumResults)
 
-  requests <- list(requests = imageRequests)
-  jsonlite::toJSON(requests, auto_unbox = TRUE)
+    requests <- list(requests = imageRequests)
+    jsonlite::toJSON(requests, auto_unbox = TRUE)
 }
 
 #' @title helper function to create a list of details of one image annotation request
@@ -132,20 +152,19 @@ create_request_body <- function(imagePaths, feature, maxNumResults) {
 #' @return list of request details for one image
 #'
 create_single_image_request <- function(imagePath, feature, maxNumResults) {
+    if (grepl("^(http|https|gs)://", imagePath)) {
+        image_in_request <- list(source = list(imageUri = imagePath))
+    } else {
+        image_in_request <- list(content = as.character(encode_image(imagePath)))
+    }
 
-  if (grepl("^(http|https|gs)://", imagePath)) {
-    image_in_request <- list(source = list(imageUri = imagePath))
-  } else {
-    image_in_request <- list(content = as.character(encode_image(imagePath)))
-  }
+    features_in_request <- list(type = feature)
+    if (is.numeric(maxNumResults)) features_in_request[["maxResults"]] <- maxNumResults
 
-  features_in_request <- list(type = feature)
-  if(is.numeric(maxNumResults)) features_in_request[["maxResults"]] <- maxNumResults
-
-  list(
-    image    = image_in_request,
-    features = features_in_request
-  )
+    list(
+        image    = image_in_request,
+        features = features_in_request
+    )
 }
 
 #' @title helper function to base64 encode the image file
@@ -156,9 +175,9 @@ create_single_image_request <- function(imagePath, feature, maxNumResults) {
 #' @return get the image back as encoded file
 #'
 encode_image <- function(imagePath) {
-  caTools::base64encode(
-    readBin(imagePath, "raw", file.info(imagePath)[1, "size"])
-  )
+    caTools::base64encode(
+        readBin(imagePath, "raw", file.info(imagePath)[1, "size"])
+    )
 }
 
 #' @title helper function to send POST request to the Google Vision API
@@ -169,12 +188,11 @@ encode_image <- function(imagePath) {
 #' @return API response in raw format
 #'
 call_vision_api <- function(body) {
-
-  simple_call <- googleAuthR::gar_api_generator(
-    baseURI = "https://vision.googleapis.com/v1/images:annotate",
-    http_header = "POST"
-  )
-  simple_call(the_body = body)
+    simple_call <- googleAuthR::gar_api_generator(
+        baseURI = "https://vision.googleapis.com/v1/images:annotate",
+        http_header = "POST"
+    )
+    simple_call(the_body = body)
 }
 
 #' @title helper function code to extract the response data.frame
@@ -186,17 +204,17 @@ call_vision_api <- function(body) {
 #' @return a data.table
 #'
 extract_response <- function(responses, imagePaths, feature){
-  feature_type <- get_feature_types()[[feature]]
-  errors <- data.table(image_path = imagePaths)
-  annotations  <- data.table(image_path = imagePaths)
+    feature_type <- get_feature_types()[[feature]]
+    errors <- data.table(image_path = imagePaths)
+    annotations  <- data.table(image_path = imagePaths)
 
-  if (!is.null(responses[["error"]])) {
-    errors <- extract_error(responses, imagePaths)
-  }
-  if (!is.null(responses[[feature_type]])) {
-    annotations <- extract_annotations(responses, imagePaths, feature_type)
-  }
-  merge(annotations, errors, by = "image_path", sort = FALSE)
+    if (!is.null(responses[["error"]])) {
+        errors <- extract_error(responses, imagePaths)
+    }
+    if (!is.null(responses[[feature_type]])) {
+        annotations <- extract_annotations(responses, imagePaths, feature_type)
+    }
+    merge(annotations, errors, by = "image_path", sort = FALSE)
 }
 
 #' @title helper function code to extract the annotations
@@ -209,15 +227,14 @@ extract_response <- function(responses, imagePaths, feature){
 #' @return a data.table
 #'
 extract_annotations <- function(responses, imagePaths, feature_type) {
+    purrr::map2(responses[[feature_type]], imagePaths, ~{
+        responseDT <- extractor(feature_type)(.x)
+        responseDT[["image_path"]] <- .y
 
-  purrr::map2(responses[[feature_type]], imagePaths, ~{
-    responseDT <- extractor(feature_type)(.x)
-    responseDT[["image_path"]] <- .y
-
-    responseDT
-  }) %>%
-    data.table::rbindlist(fill = TRUE) %>%
-    data.table::setcolorder("image_path")
+        responseDT
+    }) %>%
+        data.table::rbindlist(fill = TRUE) %>%
+        data.table::setcolorder("image_path")
 }
 
 #' @title helper function code to extract error from API response into a data.table
@@ -228,11 +245,11 @@ extract_annotations <- function(responses, imagePaths, feature_type) {
 #' @return a data.table
 #'
 extract_error <- function(responses, imagePaths) {
-  data.table(
-    image_path = imagePaths,
-    error_code = responses[["error"]][["code"]],
-    error_message = responses[["error"]][["message"]]
-  )
+    data.table(
+        image_path = imagePaths,
+        error_code = responses[["error"]][["code"]],
+        error_message = responses[["error"]][["message"]]
+    )
 }
 
 #' @title helper function code to record available feature types
@@ -240,14 +257,14 @@ extract_error <- function(responses, imagePaths) {
 #' @return a list of available features and their types
 #'
 get_feature_types <- function() {
-  list(
-    LABEL_DETECTION         = "labelAnnotations",
-    TEXT_DETECTION          = "textAnnotations",
-    DOCUMENT_TEXT_DETECTION = "textAnnotations",
-    FACE_DETECTION          = "faceAnnotations",
-    LOGO_DETECTION          = "logoAnnotations",
-    LANDMARK_DETECTION      = "landmarkAnnotations"
-  )
+    list(
+        LABEL_DETECTION         = "labelAnnotations",
+        TEXT_DETECTION          = "textAnnotations",
+        DOCUMENT_TEXT_DETECTION = "textAnnotations",
+        FACE_DETECTION          = "faceAnnotations",
+        LOGO_DETECTION          = "logoAnnotations",
+        LANDMARK_DETECTION      = "landmarkAnnotations"
+    )
 }
 
 #' @title helper function code to provide an extractor function for different feature types
@@ -258,19 +275,19 @@ get_feature_types <- function() {
 #' @return a function
 #'
 extractor <- function(feature_type) {
-  if (feature_type == "labelAnnotations") {
-    label_detection_extractor
-  } else if (feature_type == "textAnnotations") {
-    ocr_extractor
-  } else if (feature_type == "faceAnnotations") {
-    face_detection_extractor
-  } else if (feature_type == "logoAnnotations") {
-    logo_detection_extractor
-  } else if (feature_type == "landmarkAnnotations") {
-    landmark_detection_extractor
-  } else {
-    stop("Unrecognized feature type")
-  }
+    if (feature_type == "labelAnnotations") {
+        label_detection_extractor
+    } else if (feature_type == "textAnnotations") {
+        ocr_extractor
+    } else if (feature_type == "faceAnnotations") {
+        face_detection_extractor
+    } else if (feature_type == "logoAnnotations") {
+        logo_detection_extractor
+    } else if (feature_type == "landmarkAnnotations") {
+        landmark_detection_extractor
+    } else {
+        stop("Unrecognized feature type")
+    }
 }
 
 #' @title helper function code to extract API response into a data.table for given feature type
@@ -281,13 +298,13 @@ extractor <- function(feature_type) {
 #'
 label_detection_extractor <- function(response) {
     if (is.null(response)) {
-      data.table::data.table(
-        mid         = NA_character_,
-        description = NA_character_,
-        score       = NA
-      )
+        data.table::data.table(
+            mid         = NA_character_,
+            description = NA_character_,
+            score       = NA
+        )
     } else {
-      data.table::as.data.table(response)[, c("mid", "description", "score")]
+        data.table::as.data.table(response)[, c("mid", "description", "score")]
     }
 }
 
@@ -298,7 +315,7 @@ label_detection_extractor <- function(response) {
 #' @return a data.table
 #'
 ocr_extractor <- function(response) {
-  data.table::data.table(description = response[["description"]][1])
+    data.table::data.table(description = response[["description"]][1])
 }
 
 #' @title helper function code to extract API response into a data.table for given feature type
@@ -308,16 +325,16 @@ ocr_extractor <- function(response) {
 #' @return a data.table
 #'
 face_detection_extractor <- function(response) {
-  boundingBoxes <- getBoundingBoxes(response)
+    boundingBoxes <- getBoundingBoxes(response)
 
-  cbind(
-    boundingBoxes,
-    data.table::as.data.table(response[,
-          c("detectionConfidence", "landmarkingConfidence", "joyLikelihood",
-            "sorrowLikelihood", "angerLikelihood", "surpriseLikelihood",
-            "underExposedLikelihood", "blurredLikelihood", "headwearLikelihood")
-       ])
-  )
+    cbind(
+        boundingBoxes,
+        data.table::as.data.table(response[,
+            c("detectionConfidence", "landmarkingConfidence", "joyLikelihood",
+              "sorrowLikelihood", "angerLikelihood", "surpriseLikelihood",
+              "underExposedLikelihood", "blurredLikelihood", "headwearLikelihood")
+        ])
+    )
 }
 
 #' @title helper function code to extract API response into a data.table for given feature type
@@ -327,12 +344,12 @@ face_detection_extractor <- function(response) {
 #' @return a data.table
 #'
 logo_detection_extractor <- function(response) {
-  boundingBoxes <- getBoundingBoxes(response)
+    boundingBoxes <- getBoundingBoxes(response)
 
-  cbind(
-    data.table::as.data.table(response[, c("mid", "description", "score")]),
-    boundingBoxes
-  )
+    cbind(
+        data.table::as.data.table(response[, c("mid", "description", "score")]),
+        boundingBoxes
+    )
 }
 
 #' @title helper function code to extract API response into a data.table for given feature type
@@ -342,17 +359,17 @@ logo_detection_extractor <- function(response) {
 #' @return a data.table
 #'
 landmark_detection_extractor <- function(response) {
-  boundingBoxes <- getBoundingBoxes(response)
+    boundingBoxes <- getBoundingBoxes(response)
 
-  geoCoordinates <- purrr::map(response[["locations"]], ~{
-    as.data.table(.x[["latLng"]])
-  }) %>% data.table::rbindlist()
+    geoCoordinates <- purrr::map(response[["locations"]], ~{
+        as.data.table(.x[["latLng"]])
+    }) %>% data.table::rbindlist()
 
-  cbind(
-    data.table::as.data.table(response)[, c("mid", "description", "score")],
-    boundingBoxes,
-    geoCoordinates
-  )
+    cbind(
+        data.table::as.data.table(response)[, c("mid", "description", "score")],
+        boundingBoxes,
+        geoCoordinates
+    )
 }
 
 #' @title helper function code to extract Bounding Box x,y coordinates for an API response element
@@ -362,9 +379,9 @@ landmark_detection_extractor <- function(response) {
 #' @return a data.table
 #'
 getBoundingBoxes <- function(response) {
-  purrr::map(response[["boundingPoly"]]$vertices, ~{
-      data.table(
-        x = paste(.x[["x"]], collapse = ", "),
-        y = paste(.x[["y"]], collapse = ", "))
-  }) %>% data.table::rbindlist()
+    purrr::map(response[["boundingPoly"]]$vertices, ~{
+        data.table(
+            x = paste(.x[["x"]], collapse = ", "),
+            y = paste(.x[["y"]], collapse = ", "))
+    }) %>% data.table::rbindlist()
 }

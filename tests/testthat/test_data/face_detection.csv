@@ -1,3 +1,3 @@
-image_path,x,y,detectionConfidence,landmarkingConfidence,joyLikelihood,sorrowLikelihood,angerLikelihood,surpriseLikelihood,underExposedLikelihood,blurredLikelihood,headwearLikelihood
-../../inst/extdata/arnold_wife.jpg,"140, 331, 331, 140","26, 26, 248, 248",0.99996805,0.7349092,VERY_LIKELY,VERY_UNLIKELY,VERY_UNLIKELY,VERY_UNLIKELY,VERY_UNLIKELY,VERY_UNLIKELY,VERY_UNLIKELY
-../../inst/extdata/arnold_wife.jpg,"339, 499, 499, 339","133, 133, 320, 320",0.9999861,0.7662562,VERY_UNLIKELY,VERY_UNLIKELY,VERY_UNLIKELY,VERY_UNLIKELY,VERY_UNLIKELY,VERY_UNLIKELY,VERY_UNLIKELY
+image_path,x,y,detectionConfidence,landmarkingConfidence,joyLikelihood,sorrowLikelihood,angerLikelihood,surpriseLikelihood,underExposedLikelihood,blurredLikelihood,headwearLikelihood,feature
+../../inst/extdata/arnold_wife.jpg,"140, 331, 331, 140","26, 26, 248, 248",0.99996805,0.7349092,VERY_LIKELY,VERY_UNLIKELY,VERY_UNLIKELY,VERY_UNLIKELY,VERY_UNLIKELY,VERY_UNLIKELY,VERY_UNLIKELY,FACE_DETECTION
+../../inst/extdata/arnold_wife.jpg,"339, 499, 499, 339","133, 133, 320, 320",0.9999861,0.7662562,VERY_UNLIKELY,VERY_UNLIKELY,VERY_UNLIKELY,VERY_UNLIKELY,VERY_UNLIKELY,VERY_UNLIKELY,VERY_UNLIKELY,FACE_DETECTION

@@ -25,10 +25,11 @@ test_that("returns the expected number of rows", {
     skip_on_travis()
 
     purrr::pwalk(cases, function(feature, image_path, result_data) {
-        expect_equal(
-            gcv_get_image_annotations(paste0(base_image_path, image_path), feature = feature)[, .N],
-            data.table::fread(paste0(base_result_path, result_data))[, .N]
-        )
+        numRowResponse <- gcv_get_image_annotations(
+            paste0(base_image_path, image_path), feature = feature
+        )[, .N]
+        numRowExpected <- data.table::fread(paste0(base_result_path, result_data))[, .N]
+        expect_equal(numRowResponse, numRowExpected)
     })
 })
 

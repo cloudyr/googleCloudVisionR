@@ -1,7 +1,7 @@
 Package: googleCloudVisionR
-Title: Access to 'Google Cloud Vision' API for Image Recognition, OCR and
+Title: Access to the 'Google Cloud Vision' API for Image Recognition, OCR and
     Labeling
-Description: Interact with 'Google Cloud Vision' <https://cloud.google.com/vision/>
+Description: Interact with the 'Google Cloud Vision' <https://cloud.google.com/vision/>
   API in R. Part of the 'cloudyr' <https://cloudyr.github.io/> project.
 Version: 0.1.0.9000
 Authors@R: c(

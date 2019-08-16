@@ -2,21 +2,27 @@ context("integration")
 
 base_image_path <- "../../inst/extdata/"
 base_result_path <- "test_data/"
-cases <- data.table(
-    feature = list("LABEL_DETECTION", "TEXT_DETECTION", "DOCUMENT_TEXT_DETECTION", "FACE_DETECTION", "LOGO_DETECTION", "LANDMARK_DETECTION"),
-    image_path = list("golden_retriever_puppies.jpg", "essex.jpg", "essex.jpg", "arnold_wife.jpg", "brandlogos.png", "notre-dame.jpg"),
-    result_data = list("label_detection.csv", "text_detection.csv", "document_text_detection.csv", "face_detection.csv", "logo_detection.csv", "landmark_detection.csv")
-)
+cases <- rbind(
+    data.table(f = "LABEL_DETECTION",         i = "golden_retriever_puppies.jpg", rd = "label_detection.csv"),
+    data.table(f = "TEXT_DETECTION",          i = "essex.jpg",                    rd = "text_detection.csv"),
+    data.table(f = "DOCUMENT_TEXT_DETECTION", i = "essex.jpg",                    rd = "document_text_detection.csv"),
+    data.table(f = "FACE_DETECTION",          i = "arnold_wife.jpg",              rd = "face_detection.csv"),
+    data.table(f = "LOGO_DETECTION",          i = "brandlogos.png",               rd = "logo_detection.csv"),
+    data.table(f = "LANDMARK_DETECTION",      i = "notre-dame.jpg",               rd = "landmark_detection.csv")
+) %>% setnames(c("feature", "image_path", "result_data"))
+
 
 test_that("returns the right columns", {
     skip_on_cran()
     skip_on_travis()
 
     purrr::pwalk(cases, function(feature, image_path, result_data) {
-        expect_equal(
-            gcv_get_image_annotations(paste0(base_image_path, image_path), feature = feature) %>% names(),
-            data.table::fread(paste0(base_result_path, result_data)) %>% names()
-        )
+        responseCols <- names(gcv_get_image_annotations(
+            paste0(base_image_path, image_path), feature = feature
+        ))
+        expectedCols <- names(fread(paste0(base_result_path, result_data)))
+
+        expect_equal(responseCols, expectedCols)
     })
 })
 

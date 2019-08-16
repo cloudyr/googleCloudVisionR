@@ -1,6 +1,6 @@
-#' @title Calling Google's Cloud Vision API
+#' @title Get parsed image annotations from the Google Cloud Vision API
 #' @description Given a list of images, a feature type and the maximum number of responses,
-#'   this functions calls the Google Cloud Vision API, and returns the image annotations.
+#'   this functions calls the Google Cloud Vision API, and returns the image annotations in a data.table format.
 #'
 #' @param imagePaths character, file paths, URLs or Cloud Storage URIs of the images,
 #'   can be a combination of all three
@@ -93,13 +93,43 @@ split_to_chunks <- function(vec, chunkSize) {
 #' @return a data frame with image annotation results
 #'
 gcv_get_response <- function(imagePaths, feature, maxNumResults){
-    body <- create_request_body(imagePaths, feature, maxNumResults)
-    rawResponse <- call_vision_api(body)
+    rawResponse <- gcv_get_raw_response(imagePaths, feature, maxNumResults)
     extract_response(
-        rawResponse[["content"]][["responses"]],
-        imagePaths,
-        feature
+        rawResponse[["content"]][["responses"]], imagePaths, feature
     ) %>% .[, feature := feature]
+}
+
+#' @title Get raw API response from the Google Cloud Vision API
+#' @description Given a list of images, a feature type and the maximum number of responses,
+#'   this functions calls the Google Cloud Vision API, and returns the raw response from the API.
+#'   For a friendlier response, refer to the `gcv_get_image_annotations` function, which returns
+#'   results in a data.table format (however, the information returned is limited compared to the
+#'   raw response).
+#'
+#' @inheritParams gcv_get_image_annotations
+#'
+#' @return a response object returned by the API. To get the image annotations, take the
+#'   "content" element from the object
+#'
+#' @examples \dontrun{
+#'     imagePath <- system.file(
+#'       "extdata", "golden_retriever_puppies.jpg", package = "googleCloudVisionR"
+#'     )
+#'     raw_response <- gcv_get_raw_response(imagePaths = imagePath, maxNumResults = 7)
+#'
+#'     str(raw_response)
+#'     raw_response[["content"]]
+#' }
+#'
+#' @export
+#'
+gcv_get_raw_response <- function(imagePaths,
+                                 feature = "LABEL_DETECTION",
+                                 maxNumResults = NULL) {
+    validate_image_paths(imagePaths)
+
+    body <- create_request_body(imagePaths, feature, maxNumResults)
+    call_vision_api(body)
 }
 
 #' @title helper function to create json for response request

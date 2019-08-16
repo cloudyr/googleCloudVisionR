@@ -136,10 +136,10 @@ context("Google Vision API")
 
 test_that("handles case of non-image URL", {
     expected_response <- create_response(FALSE)
-    callVisionAPIMock <- mockery::mock(
+    gcvGetRawResponseMock <- mockery::mock(
         list(content = list(responses = expected_response))
     )
-    mockery::stub(gcv_get_response, "call_vision_api", callVisionAPIMock)
+    mockery::stub(gcv_get_response, "gcv_get_raw_response", gcvGetRawResponseMock)
     # depth = 2 fails on devtools::check(), so we are not mocking the public function
 
     expect_equal(
@@ -152,10 +152,10 @@ test_that("handles case of non-image URL", {
 
 test_that("handles successful responses with LABEL_DETECTION", {
     expected_response <- create_response(TRUE)
-    callVisionAPIMock <- mockery::mock(
+    gcvGetRawResponseMock <- mockery::mock(
         list(content = list(responses = expected_response))
     )
-    mockery::stub(gcv_get_response, "call_vision_api", callVisionAPIMock)
+    mockery::stub(gcv_get_response, "gcv_get_raw_response", gcvGetRawResponseMock)
     # depth = 2 fails on devtools::check(), so we are not mocking the public function
 
     expect_equal(
@@ -173,10 +173,10 @@ test_that("handles successful responses with LABEL_DETECTION", {
 
 test_that("handles mixed successes and errors", {
     expected_response <- create_response(c(TRUE, FALSE))
-    callVisionAPIMock <- mockery::mock(
+    gcvGetRawResponseMock <- mockery::mock(
         list(content = list(responses = expected_response))
     )
-    mockery::stub(gcv_get_response, "call_vision_api", callVisionAPIMock)
+    mockery::stub(gcv_get_response, "gcv_get_raw_response", gcvGetRawResponseMock)
     # depth = 2 fails on devtools::check(), so we are not mocking the public function
 
     expect_equal(

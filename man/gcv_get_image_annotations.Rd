@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_google_vision_response.R
 \name{gcv_get_image_annotations}
 \alias{gcv_get_image_annotations}
-\title{Calling Google's Cloud Vision API}
+\title{Get parsed image annotations from the Google Cloud Vision API}
 \usage{
 gcv_get_image_annotations(imagePaths, feature = "LABEL_DETECTION",
   maxNumResults = NULL, batchSize = 64L, savePath = NULL)
@@ -25,7 +25,7 @@ a data frame with image annotation results
 }
 \description{
 Given a list of images, a feature type and the maximum number of responses,
-  this functions calls the Google Cloud Vision API, and returns the image annotations.
+  this functions calls the Google Cloud Vision API, and returns the image annotations in a data.table format.
 }
 \examples{
 \dontrun{

@@ -207,7 +207,7 @@ call_vision_api <- function(body) {
 #' @return a data.table
 #'
 extract_response <- function(responses, imagePaths, feature){
-    feature_type <- get_feature_types()[[feature]]
+    feature_type <- get_available_feature_types()[[feature]]
     errors <- data.table(image_path = imagePaths)
     annotations  <- data.table(image_path = imagePaths)
 
@@ -257,9 +257,13 @@ extract_error <- function(responses, imagePaths) {
 
 #' @title helper function code to record available feature types
 #'
-#' @return a list of available features and their types
+#' @return a list of available features names and their types (as returned by the API)
 #'
-get_feature_types <- function() {
+#' @examples
+#' get_available_feature_types()
+#'
+#' @export
+get_available_feature_types <- function() {
     list(
         LABEL_DETECTION         = "labelAnnotations",
         TEXT_DETECTION          = "textAnnotations",

@@ -2,5 +2,6 @@
 
 export(gcv_get_image_annotations)
 export(gcv_get_raw_response)
+export(get_available_feature_types)
 import(data.table)
 importFrom(purrr,"%>%")

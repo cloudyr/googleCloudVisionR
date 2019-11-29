@@ -17,9 +17,9 @@ get_invalid_image_paths <- function(vec) {
 }
 
 validate_feature <- function(feature) {
-    if (!(feature %in% names(get_feature_types()))) {
+    if (!(feature %in% names(get_available_feature_types()))) {
         stop(paste0("Invalid feature: ", feature, " - it should be one of: ",
-            paste0(paste0("'", names(get_feature_types()), "'"), collapse = ", ")))
+            paste0(paste0("'", names(get_available_feature_types()), "'"), collapse = ", ")))
     }
 }
 

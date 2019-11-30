@@ -255,25 +255,6 @@ extract_error <- function(responses, imagePaths) {
     )
 }
 
-#' @title helper function code to record available feature types
-#'
-#' @return a list of available features names and their types (as returned by the API)
-#'
-#' @examples
-#' get_available_feature_types()
-#'
-#' @export
-get_available_feature_types <- function() {
-    list(
-        LABEL_DETECTION         = "labelAnnotations",
-        TEXT_DETECTION          = "textAnnotations",
-        DOCUMENT_TEXT_DETECTION = "textAnnotations",
-        FACE_DETECTION          = "faceAnnotations",
-        LOGO_DETECTION          = "logoAnnotations",
-        LANDMARK_DETECTION      = "landmarkAnnotations"
-    )
-}
-
 #' @title helper function code to provide an extractor function for different feature types
 #' @description a utility to provide functions to extract features from the API response
 #'

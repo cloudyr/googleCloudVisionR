@@ -310,7 +310,13 @@ label_detection_extractor <- function(response) {
 #' @return a data.table
 #'
 ocr_extractor <- function(response) {
-    data.table::data.table(description = response[["description"]][1])
+    # note: currently we only return the "detailed" results, that's why the subsetting
+    nRows <- nrow(response)
+    data.table::data.table(
+        description = response[["description"]][2:nRows],
+        getBoundingBoxes(response)[2:nRows]
+    )
+    
 }
 
 #' @title helper function code to extract API response into a data.table for given feature type

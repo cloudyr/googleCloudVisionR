@@ -4,10 +4,10 @@
 \alias{extractor}
 \title{helper function code to provide an extractor function for different feature types}
 \usage{
-extractor(feature_type)
+extractor(featureType)
 }
 \arguments{
-\item{feature_type}{the type of annotation as called in the response object}
+\item{featureType}{the type of annotation as called in the response object}
 }
 \value{
 a function

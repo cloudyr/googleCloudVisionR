@@ -187,13 +187,17 @@ encode_image <- function(imagePath) {
 #' @description sends the request defined in `body` to the API
 #'
 #' @param body, output of create_request_body()
+#' @param apiEndpoint character, api endpoint
+#' @param httpRequestType character, type of the http request
 #'
 #' @return API response in raw format
 #'
-call_vision_api <- function(body) {
+call_vision_api <- function(body,
+                            apiEndpoint = "images:annotate",
+                            httpRequestType = "POST") {
     simple_call <- googleAuthR::gar_api_generator(
-        baseURI = "https://vision.googleapis.com/v1/images:annotate",
-        http_header = "POST"
+        baseURI = paste0("https://vision.googleapis.com/v1/", apiEndpoint),
+        http_header = httpRequestType
     )
     simple_call(the_body = body)
 }
@@ -207,7 +211,7 @@ call_vision_api <- function(body) {
 #' @return a data.table
 #'
 extract_response <- function(responses, imagePaths, feature){
-    feature_type <- get_available_feature_types()[[feature]]
+    featureType <- get_available_feature_types()[[feature]]
     errors <- data.table(image_path = imagePaths)
     annotations  <- data.table(image_path = imagePaths)
 
@@ -218,9 +222,9 @@ extract_response <- function(responses, imagePaths, feature){
         annotations <- extract_annotations_for_product_search(
             responses, imagePaths
         )
-    } else if (!is.null(responses[[feature_type]])) {
+    } else if (!is.null(responses[[featureType]])) {
         annotations <- extract_annotations(
-            responses, imagePaths, feature_type
+            responses, imagePaths, featureType
         )
     }
     merge(annotations, errors, by = "image_path", sort = FALSE)
@@ -230,14 +234,14 @@ extract_response <- function(responses, imagePaths, feature){
 #' @description a utility to extract features from the API response
 #'
 #' @param responses an API response object
-#' @param feature_type the type of annotation as called in the response object
+#' @param featureType the type of annotation as called in the response object
 #' @inheritParams gcv_get_image_annotations
 #'
 #' @return a data.table
 #'
-extract_annotations <- function(responses, imagePaths, feature_type) {
-    purrr::map2(responses[[feature_type]], imagePaths, ~{
-        responseDT <- extractor(feature_type)(.x)
+extract_annotations <- function(responses, imagePaths, featureType) {
+    purrr::map2(responses[[featureType]], imagePaths, ~{
+        responseDT <- extractor(featureType)(.x)
         responseDT[["image_path"]] <- .y
 
         responseDT
@@ -268,16 +272,16 @@ extract_error <- function(responses, imagePaths) {
 #'
 #' @return a function
 #'
-extractor <- function(feature_type) {
-    if (feature_type == "labelAnnotations") {
+extractor <- function(featureType) {
+    if (featureType == "labelAnnotations") {
         label_detection_extractor
-    } else if (feature_type == "textAnnotations") {
+    } else if (featureType == "textAnnotations") {
         ocr_extractor
-    } else if (feature_type == "faceAnnotations") {
+    } else if (featureType == "faceAnnotations") {
         face_detection_extractor
-    } else if (feature_type == "logoAnnotations") {
+    } else if (featureType == "logoAnnotations") {
         logo_detection_extractor
-    } else if (feature_type == "landmarkAnnotations") {
+    } else if (featureType == "landmarkAnnotations") {
         landmark_detection_extractor
     } else {
         stop("Unrecognized feature type")
@@ -316,7 +320,6 @@ ocr_extractor <- function(response) {
         description = response[["description"]][2:nRows],
         getBoundingBoxes(response)[2:nRows]
     )
-    
 }
 
 #' @title helper function code to extract API response into a data.table for given feature type

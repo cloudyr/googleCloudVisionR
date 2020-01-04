@@ -4,19 +4,19 @@
 \alias{gcv_get_search_product_response}
 \title{Get parsed results from the Vision API Product Search}
 \usage{
-gcv_get_search_product_response(imagePath, project_id, location_id,
-  product_set_id, product_category, maxNumResults)
+gcv_get_search_product_response(imagePath, projectId, locationId,
+  productSetId, productCategory, maxNumResults)
 }
 \arguments{
 \item{imagePath}{character, file path, URLs or Cloud Storage URI of the image}
 
-\item{project_id}{character, GCP project id}
+\item{projectId}{character, GCP project id}
 
-\item{location_id}{character, GCP location id}
+\item{locationId}{character, GCP location id}
 
-\item{product_set_id}{character, product set id for Product Search}
+\item{productSetId}{character, product set id for Product Search}
 
-\item{product_category}{character, roduct category for Product Search}
+\item{productCategory}{character, roduct category for Product Search}
 
 \item{maxNumResults}{integer, the maximum number of results (per image) to be returned.}
 }

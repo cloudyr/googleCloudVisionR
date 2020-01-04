@@ -4,7 +4,7 @@
 \alias{extract_annotations}
 \title{helper function code to extract the annotations}
 \usage{
-extract_annotations(responses, imagePaths, feature_type)
+extract_annotations(responses, imagePaths, featureType)
 }
 \arguments{
 \item{responses}{an API response object}
@@ -12,7 +12,7 @@ extract_annotations(responses, imagePaths, feature_type)
 \item{imagePaths}{character, file paths, URLs or Cloud Storage URIs of the images,
 can be a combination of all three}
 
-\item{feature_type}{the type of annotation as called in the response object}
+\item{featureType}{the type of annotation as called in the response object}
 }
 \value{
 a data.table

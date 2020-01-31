@@ -4,3 +4,4 @@
 .RData
 .DS_Store
 docs/
+credentials/*

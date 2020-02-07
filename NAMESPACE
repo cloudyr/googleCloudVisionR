@@ -2,8 +2,6 @@
 
 export(gcv_get_available_feature_types)
 export(gcv_get_image_annotations)
-export(gcv_get_product_search_raw_response)
-export(gcv_get_product_search_response)
 export(gcv_get_raw_response)
 import(data.table)
 importFrom(purrr,"%>%")

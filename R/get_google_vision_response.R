@@ -218,14 +218,8 @@ extract_response <- function(responses, imagePaths, feature){
     if (!is.null(responses[["error"]])) {
         errors <- extract_error(responses, imagePaths)
     }
-    if (feature == "PRODUCT_SEARCH") {
-        annotations <- extract_annotations_for_product_search(
-            responses, imagePaths
-        )
-    } else if (!is.null(responses[[featureType]])) {
-        annotations <- extract_annotations(
-            responses, imagePaths, featureType
-        )
+    if (!is.null(responses[[featureType]])) {
+        annotations <- extract_annotations(responses, imagePaths, featureType)
     }
     merge(annotations, errors, by = "image_path", sort = FALSE)
 }

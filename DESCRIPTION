@@ -13,7 +13,6 @@ Authors@R: c(
     person("Florian", "Teschner",  role = "ctb"))
 BugReports: https://github.com/cloudyr/googleCloudVisionR/issues
 Imports:
-    caTools,
     googleAuthR,
     jsonlite,
     purrr,

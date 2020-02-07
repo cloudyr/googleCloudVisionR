@@ -178,7 +178,7 @@ create_single_image_request <- function(imagePath, feature, maxNumResults) {
 #' @return get the image back as encoded file
 #'
 encode_image <- function(imagePath) {
-    caTools::base64encode(
+    jsonlite::base64_enc(
         readBin(imagePath, "raw", file.info(imagePath)[1, "size"])
     )
 }
@@ -211,7 +211,7 @@ call_vision_api <- function(body,
 #' @return a data.table
 #'
 extract_response <- function(responses, imagePaths, feature){
-    featureType <- get_available_feature_types()[[feature]]
+    featureType <- gcv_get_available_feature_types()[[feature]]
     errors <- data.table(image_path = imagePaths)
     annotations  <- data.table(image_path = imagePaths)
 
@@ -318,7 +318,7 @@ ocr_extractor <- function(response) {
     nRows <- nrow(response)
     data.table::data.table(
         description = response[["description"]][2:nRows],
-        getBoundingBoxes(response)[2:nRows]
+        get_bounding_boxes(response)[2:nRows]
     )
 }
 
@@ -329,7 +329,7 @@ ocr_extractor <- function(response) {
 #' @return a data.table
 #'
 face_detection_extractor <- function(response) {
-    boundingBoxes <- getBoundingBoxes(response)
+    boundingBoxes <- get_bounding_boxes(response)
 
     cbind(
         boundingBoxes,
@@ -337,7 +337,12 @@ face_detection_extractor <- function(response) {
             c("detectionConfidence", "landmarkingConfidence", "joyLikelihood",
               "sorrowLikelihood", "angerLikelihood", "surpriseLikelihood",
               "underExposedLikelihood", "blurredLikelihood", "headwearLikelihood")
-        ])
+        ]) %>%
+        setnames(
+            c("detection_confidence", "landmarking_confidence",
+            "joy_likelihood", "sorrow_likelihood", "anger_likelihood", "surprise_likelihood",
+            "under_exposed_likelihood", "blurred_likelihood", "headwear_likelihood")
+        )
     )
 }
 
@@ -348,7 +353,7 @@ face_detection_extractor <- function(response) {
 #' @return a data.table
 #'
 logo_detection_extractor <- function(response) {
-    boundingBoxes <- getBoundingBoxes(response)
+    boundingBoxes <- get_bounding_boxes(response)
 
     cbind(
         data.table::as.data.table(response[, c("mid", "description", "score")]),
@@ -363,7 +368,7 @@ logo_detection_extractor <- function(response) {
 #' @return a data.table
 #'
 landmark_detection_extractor <- function(response) {
-    boundingBoxes <- getBoundingBoxes(response)
+    boundingBoxes <- get_bounding_boxes(response)
 
     geoCoordinates <- purrr::map(response[["locations"]], ~{
         as.data.table(.x[["latLng"]])
@@ -382,10 +387,11 @@ landmark_detection_extractor <- function(response) {
 #'
 #' @return a data.table
 #'
-getBoundingBoxes <- function(response) {
+get_bounding_boxes <- function(response) {
     purrr::map(response[["boundingPoly"]]$vertices, ~{
         data.table(
             x = paste(.x[["x"]], collapse = ", "),
-            y = paste(.x[["y"]], collapse = ", "))
+            y = paste(.x[["y"]], collapse = ", ")
+        )
     }) %>% data.table::rbindlist()
 }

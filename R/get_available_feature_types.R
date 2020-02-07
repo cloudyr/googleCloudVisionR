@@ -3,10 +3,10 @@
 #' @return a list of available features names and their types (as returned by the API)
 #'
 #' @examples
-#' get_available_feature_types()
+#' gcv_get_available_feature_types()
 #'
 #' @export
-get_available_feature_types <- function() {
+gcv_get_available_feature_types <- function() {
     list(
         LABEL_DETECTION         = "labelAnnotations",
         TEXT_DETECTION          = "textAnnotations",

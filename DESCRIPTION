@@ -3,7 +3,7 @@ Title: Access to the 'Google Cloud Vision' API for Image Recognition, OCR and
     Labeling
 Description: Interact with the 'Google Cloud Vision' <https://cloud.google.com/vision/>
   API in R. Part of the 'cloudyr' <https://cloudyr.github.io/> project.
-Version: 0.1.0.9000
+Version: 0.2.0
 Authors@R: c(
     person("Jeno", "Pal", email = "paljenczy@gmail.com", role = "cre"),
     person("Tamas", "Koncz", email = "t.koncz@gmail.com", role = "aut"),

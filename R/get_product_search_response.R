@@ -15,7 +15,7 @@
 #'
 #' @export
 #'
-gcv_get_search_product_response <- function(imagePath,
+gcv_get_product_search_response <- function(imagePath,
                                             projectId,
                                             locationId,
                                             productSetId,
@@ -28,10 +28,13 @@ gcv_get_search_product_response <- function(imagePath,
         projectId, locationId, productSetId, productCategory,
         maxNumResults
     )
+
     extract_response(
         rawResponse[["content"]][["responses"]],
         imagePath, feature = feature
-    ) %>% .[, feature := feature]
+    ) %>%
+        .[, feature := feature] %>%
+        .[]
 }
 
 #' @title Get raw results from the Vision API Product Search
@@ -40,7 +43,7 @@ gcv_get_search_product_response <- function(imagePath,
 #'   If you are looking for a friendlier result, refer to the
 #'   `gcv_get_product_search_response()` function
 #'
-#' @inheritParams gcv_get_search_product_response
+#' @inheritParams gcv_get_product_search_response
 #'
 #' @return a list with product search results
 #'

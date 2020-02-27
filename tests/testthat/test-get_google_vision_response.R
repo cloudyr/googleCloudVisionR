@@ -136,9 +136,7 @@ context("Google Vision API")
 
 test_that("handles case of non-image URL", {
     expected_response <- create_response(FALSE)
-    gcvGetRawResponseMock <- mockery::mock(
-        list(content = list(responses = expected_response))
-    )
+    gcvGetRawResponseMock <- mockery::mock(list(responses = expected_response))
     mockery::stub(gcv_get_response, "gcv_get_raw_response", gcvGetRawResponseMock)
     # depth = 2 fails on devtools::check(), so we are not mocking the public function
 
@@ -152,11 +150,8 @@ test_that("handles case of non-image URL", {
 
 test_that("handles successful responses with LABEL_DETECTION", {
     expected_response <- create_response(TRUE)
-    gcvGetRawResponseMock <- mockery::mock(
-        list(content = list(responses = expected_response))
-    )
+    gcvGetRawResponseMock <- mockery::mock(list(responses = expected_response))
     mockery::stub(gcv_get_response, "gcv_get_raw_response", gcvGetRawResponseMock)
-    # depth = 2 fails on devtools::check(), so we are not mocking the public function
 
     expect_equal(
         gcv_get_response("http://image-url", feature = "LABEL_DETECTION", maxNumResults = NULL),
@@ -165,19 +160,15 @@ test_that("handles successful responses with LABEL_DETECTION", {
             mid = "foo",
             description = "bar",
             score = 0.987,
-            topicality = 0.987,
-            feature = "LABEL_DETECTION"
+            topicality = 0.987
         )
     )
 })
 
 test_that("handles mixed successes and errors", {
     expected_response <- create_response(c(TRUE, FALSE))
-    gcvGetRawResponseMock <- mockery::mock(
-        list(content = list(responses = expected_response))
-    )
+    gcvGetRawResponseMock <- mockery::mock(list(responses = expected_response))
     mockery::stub(gcv_get_response, "gcv_get_raw_response", gcvGetRawResponseMock)
-    # depth = 2 fails on devtools::check(), so we are not mocking the public function
 
     expect_equal(
         gcv_get_response(
@@ -191,8 +182,7 @@ test_that("handles mixed successes and errors", {
             score = c(0.987, NA),
             topicality = c(0.987, NA),
             error_code = c(NA, 3),
-            error_message = c(NA, "Nice error message."),
-            feature = rep("LABEL_DETECTION", 2)
+            error_message = c(NA, "Nice error message.")
         )
     )
 })

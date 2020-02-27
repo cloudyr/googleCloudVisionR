@@ -35,7 +35,7 @@ Given a list of images, a feature type and the maximum number of responses,
     raw_response <- gcv_get_raw_response(imagePaths = imagePath, maxNumResults = 7)
 
     str(raw_response)
-    raw_response[["content"]]
+    raw_response
 }
 
 }

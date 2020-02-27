@@ -67,7 +67,8 @@ gcv_read_response <- function(imagesToAnnotate,
                               savePath) {
     imagePathChunks <- split_to_chunks(imagesToAnnotate, batchSize)
     purrr::map(imagePathChunks, ~{
-        gcvResponse <- gcv_get_response(.x, feature, maxNumResults)
+        gcvResponse <- gcv_get_response(.x, feature, maxNumResults) %>%
+            .[, feature := feature]
         if (!is.null(savePath)) {
             data.table::fwrite(gcvResponse, savePath, append = TRUE)
         }
@@ -86,17 +87,28 @@ split_to_chunks <- function(vec, chunkSize) {
     suppressWarnings(split(vec, ceiling(seq_along(vec) / chunkSize)))
 }
 
-#' @title helper function to call the API for one batch of images
+#' @title Get parsed image annotations from the Google Cloud Vision API
+#' @description Given a list of images, a feature type and the maximum number of responses,
+#'   this functions calls the Google Cloud Vision API, and returns the image annotations in a data.table format.
 #'
 #' @inheritParams gcv_get_image_annotations
 #'
 #' @return a data frame with image annotation results
 #'
-gcv_get_response <- function(imagePaths, feature, maxNumResults){
+#' @examples \dontrun{
+#'     imagePath <- system.file(
+#'       "extdata", "golden_retriever_puppies.jpg", package = "googleCloudVisionR"
+#'     )
+#'     gcv_get_response(imagePaths = imagePath, maxNumResults = 7)
+#' }
+#'
+#' @export
+#'
+gcv_get_response <- function(imagePaths, feature, maxNumResults) {
     rawResponse <- gcv_get_raw_response(imagePaths, feature, maxNumResults)
     extract_response(
-        rawResponse[["content"]][["responses"]], imagePaths, feature
-    ) %>% .[, feature := feature]
+        rawResponse[["responses"]], imagePaths, feature
+    )
 }
 
 #' @title Get raw API response from the Google Cloud Vision API
@@ -118,7 +130,7 @@ gcv_get_response <- function(imagePaths, feature, maxNumResults){
 #'     raw_response <- gcv_get_raw_response(imagePaths = imagePath, maxNumResults = 7)
 #'
 #'     str(raw_response)
-#'     raw_response[["content"]]
+#'     raw_response
 #' }
 #'
 #' @export
@@ -129,7 +141,7 @@ gcv_get_raw_response <- function(imagePaths,
     validate_image_paths(imagePaths)
 
     body <- create_request_body(imagePaths, feature, maxNumResults)
-    call_vision_api(body)
+    call_vision_api(body)[["content"]]
 }
 
 #' @title helper function to create json for response request
@@ -210,7 +222,7 @@ call_vision_api <- function(body,
 #'
 #' @return a data.table
 #'
-extract_response <- function(responses, imagePaths, feature){
+extract_response <- function(responses, imagePaths, feature) {
     featureType <- gcv_get_available_feature_types()[[feature]]
     errors <- data.table(image_path = imagePaths)
     annotations  <- data.table(image_path = imagePaths)

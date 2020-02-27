@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_google_vision_response.R
 \name{gcv_get_response}
 \alias{gcv_get_response}
-\title{helper function to call the API for one batch of images}
+\title{Get parsed image annotations from the Google Cloud Vision API}
 \usage{
 gcv_get_response(imagePaths, feature, maxNumResults)
 }
@@ -19,5 +19,15 @@ can be a combination of all three}
 a data frame with image annotation results
 }
 \description{
-helper function to call the API for one batch of images
+Given a list of images, a feature type and the maximum number of responses,
+  this functions calls the Google Cloud Vision API, and returns the image annotations in a data.table format.
+}
+\examples{
+\dontrun{
+    imagePath <- system.file(
+      "extdata", "golden_retriever_puppies.jpg", package = "googleCloudVisionR"
+    )
+    gcv_get_response(imagePaths = imagePath, maxNumResults = 7)
+}
+
 }

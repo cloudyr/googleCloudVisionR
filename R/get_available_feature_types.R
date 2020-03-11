@@ -13,6 +13,7 @@ gcv_get_available_feature_types <- function() {
         DOCUMENT_TEXT_DETECTION = "textAnnotations",
         FACE_DETECTION          = "faceAnnotations",
         LOGO_DETECTION          = "logoAnnotations",
-        LANDMARK_DETECTION      = "landmarkAnnotations"
+        LANDMARK_DETECTION      = "landmarkAnnotations",
+        IMAGE_PROPERTIES        = "imagePropertiesAnnotation"
     )
 }

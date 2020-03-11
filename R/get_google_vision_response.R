@@ -5,7 +5,8 @@
 #' @param imagePaths character, file paths, URLs or Cloud Storage URIs of the images,
 #'   can be a combination of all three
 #' @param feature character, one out of: "LABEL_DETECTION", "FACE_DETECTION",
-#'   "TEXT_DETECTION", "DOCUMENT_TEXT_DETECTION", "LOGO_DETECTION", "LANDMARK_DETECTION"
+#'   "TEXT_DETECTION", "DOCUMENT_TEXT_DETECTION", "LOGO_DETECTION",
+#'   "LANDMARK_DETECTION", "IMAGE_PROPERTIES"
 #' @param maxNumResults integer, the maximum number of results (per image) to be returned.
 #' @param batchSize integer, the chunk size for batch processing
 #' @param savePath character, if specified, results will be saved to this path (as .csv)
@@ -293,6 +294,8 @@ extractor <- function(featureType) {
         logo_detection_extractor
     } else if (featureType == "landmarkAnnotations") {
         landmark_detection_extractor
+    } else if (featureType == "imagePropertiesAnnotation") {
+        image_properties_extractor
     } else {
         stop("Unrecognized feature type")
     }
@@ -348,7 +351,7 @@ face_detection_extractor <- function(response) {
               "sorrowLikelihood", "angerLikelihood", "surpriseLikelihood",
               "underExposedLikelihood", "blurredLikelihood", "headwearLikelihood")
         ]) %>%
-        setnames(
+        data.table::setnames(
             c("detection_confidence", "landmarking_confidence",
             "joy_likelihood", "sorrow_likelihood", "anger_likelihood", "surprise_likelihood",
             "under_exposed_likelihood", "blurred_likelihood", "headwear_likelihood")
@@ -389,6 +392,22 @@ landmark_detection_extractor <- function(response) {
         boundingBoxes,
         geoCoordinates
     )
+}
+
+#' @title helper function code to extract API response into a data.table for given feature type
+#'
+#' @param response an element of the API response object
+#'
+#' @return a data.table
+#'
+image_properties_extractor <- function(response) {
+    data.table::as.data.table(
+        response[["colors"]]
+    ) %>%
+        data.table::setnames(
+            old = c("color.red", "color.green", "color.blue", "score", "pixelFraction"),
+            new = c("red", "green", "blue", "score", "pixel_fraction")
+        )
 }
 
 #' @title helper function code to extract Bounding Box x,y coordinates for an API response element

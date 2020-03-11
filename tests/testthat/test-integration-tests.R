@@ -8,9 +8,9 @@ cases <- rbind(
     data.table(feature = "DOCUMENT_TEXT_DETECTION", image = "essex.jpg"),
     data.table(feature = "FACE_DETECTION",          image = "arnold_wife.jpg"),
     data.table(feature = "LOGO_DETECTION",          image = "brandlogos.png"),
-    data.table(feature = "LANDMARK_DETECTION",      image = "notre-dame.jpg")
+    data.table(feature = "LANDMARK_DETECTION",      image = "notre-dame.jpg"),
+    data.table(feature = "IMAGE_PROPERTIES",        image = "bali_small.jpeg")
 )
-
 
 
 test_that("returns the right columns", {
@@ -26,7 +26,8 @@ test_that("returns the right columns", {
             "under_exposed_likelihood", "blurred_likelihood", "headwear_likelihood"
         ),
         "LOGO_DETECTION" = c("mid", "description", "score", "x", "y"),
-        "LANDMARK_DETECTION" = c("mid", "description", "score", "x", "y", "latitude", "longitude")
+        "LANDMARK_DETECTION" = c("mid", "description", "score", "x", "y", "latitude", "longitude"),
+        "IMAGE_PROPERTIES" = c("red", "green", "blue", "score", "pixel_fraction")
     )
 
     purrr::walk(cases[["feature"]], ~{

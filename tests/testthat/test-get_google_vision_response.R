@@ -22,18 +22,25 @@ test_that("it throws informative exceptions if invalid feature parameter is prov
     invalidFeature <- "foobarbaz"
     expect_error(
         gcv_get_image_annotations("https://bit.ly/2IhUzdE", feature = invalidFeature),
-        paste0("Invalid feature: ", invalidFeature, " - it should be one of: ",
-               "'LABEL_DETECTION', 'TEXT_DETECTION', 'DOCUMENT_TEXT_DETECTION', ",
-               "'FACE_DETECTION', 'LOGO_DETECTION', 'LANDMARK_DETECTION'")
+        paste0(
+            "Invalid feature: ", invalidFeature, " - it should be one of: ",
+            "'LABEL_DETECTION', 'TEXT_DETECTION', 'DOCUMENT_TEXT_DETECTION', ",
+            "'FACE_DETECTION', 'LOGO_DETECTION', 'LANDMARK_DETECTION', ",
+            "'IMAGE_PROPERTIES'"
         )
+    )
 })
 
 test_that("API request is sent w/o error if valid feature parameters are provided", {
     gcvGetResponseMock <- mockery::mock()
     mockery::stub(gcv_get_image_annotations, "gcv_read_response", gcvGetResponseMock)
 
-    validFeatures <- c("LABEL_DETECTION", "TEXT_DETECTION", "DOCUMENT_TEXT_DETECTION",
-                       "FACE_DETECTION", "LOGO_DETECTION", "LANDMARK_DETECTION")
+    validFeatures <- c(
+        "LABEL_DETECTION", "TEXT_DETECTION", "DOCUMENT_TEXT_DETECTION",
+        "FACE_DETECTION", "LOGO_DETECTION", "LANDMARK_DETECTION",
+        "IMAGE_PROPERTIES"
+    )
+
     purrr::walk(validFeatures, ~{
         gcv_get_image_annotations("https://bit.ly/2IhUzdE", feature = .x)
     })

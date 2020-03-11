@@ -12,7 +12,8 @@ gcv_get_raw_response(imagePaths, feature = "LABEL_DETECTION",
 can be a combination of all three}
 
 \item{feature}{character, one out of: "LABEL_DETECTION", "FACE_DETECTION",
-"TEXT_DETECTION", "DOCUMENT_TEXT_DETECTION", "LOGO_DETECTION", "LANDMARK_DETECTION"}
+"TEXT_DETECTION", "DOCUMENT_TEXT_DETECTION", "LOGO_DETECTION",
+"LANDMARK_DETECTION", "IMAGE_PROPERTIES"}
 
 \item{maxNumResults}{integer, the maximum number of results (per image) to be returned.}
 }

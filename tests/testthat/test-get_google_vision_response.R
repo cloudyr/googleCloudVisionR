@@ -26,7 +26,7 @@ test_that("it throws informative exceptions if invalid feature parameter is prov
             "Invalid feature: ", invalidFeature, " - it should be one of: ",
             "'LABEL_DETECTION', 'TEXT_DETECTION', 'DOCUMENT_TEXT_DETECTION', ",
             "'FACE_DETECTION', 'LOGO_DETECTION', 'LANDMARK_DETECTION', ",
-            "'IMAGE_PROPERTIES'"
+            "'IMAGE_PROPERTIES', 'OBJECT_LOCALIZATION'"
         )
     )
 })
@@ -38,7 +38,7 @@ test_that("API request is sent w/o error if valid feature parameters are provide
     validFeatures <- c(
         "LABEL_DETECTION", "TEXT_DETECTION", "DOCUMENT_TEXT_DETECTION",
         "FACE_DETECTION", "LOGO_DETECTION", "LANDMARK_DETECTION",
-        "IMAGE_PROPERTIES"
+        "IMAGE_PROPERTIES", "OBJECT_LOCALIZATION"
     )
 
     purrr::walk(validFeatures, ~{

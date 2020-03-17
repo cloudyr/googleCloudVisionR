@@ -14,6 +14,7 @@ gcv_get_available_feature_types <- function() {
         FACE_DETECTION          = "faceAnnotations",
         LOGO_DETECTION          = "logoAnnotations",
         LANDMARK_DETECTION      = "landmarkAnnotations",
-        IMAGE_PROPERTIES        = "imagePropertiesAnnotation"
+        IMAGE_PROPERTIES        = "imagePropertiesAnnotation",
+        OBJECT_LOCALIZATION     = "localizedObjectAnnotations"
     )
 }

@@ -9,7 +9,8 @@ cases <- rbind(
     data.table(feature = "FACE_DETECTION",          image = "arnold_wife.jpg"),
     data.table(feature = "LOGO_DETECTION",          image = "brandlogos.png"),
     data.table(feature = "LANDMARK_DETECTION",      image = "notre-dame.jpg"),
-    data.table(feature = "IMAGE_PROPERTIES",        image = "bali_small.jpeg")
+    data.table(feature = "IMAGE_PROPERTIES",        image = "bali_small.jpeg"),
+    data.table(feature = "OBJECT_LOCALIZATION",     image = "bicycle.jpeg")
 )
 
 
@@ -27,7 +28,8 @@ test_that("returns the right columns", {
         ),
         "LOGO_DETECTION" = c("mid", "description", "score", "x", "y"),
         "LANDMARK_DETECTION" = c("mid", "description", "score", "x", "y", "latitude", "longitude"),
-        "IMAGE_PROPERTIES" = c("red", "green", "blue", "score", "pixel_fraction")
+        "IMAGE_PROPERTIES" = c("red", "green", "blue", "score", "pixel_fraction"),
+        "OBJECT_LOCALIZATION" = c("mid", "name", "score", "x", "y")
     )
 
     purrr::walk(cases[["feature"]], ~{

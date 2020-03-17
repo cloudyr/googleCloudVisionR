@@ -4,8 +4,11 @@
 \alias{gcv_get_raw_response}
 \title{Get raw API response from the Google Cloud Vision API}
 \usage{
-gcv_get_raw_response(imagePaths, feature = "LABEL_DETECTION",
-  maxNumResults = NULL)
+gcv_get_raw_response(
+  imagePaths,
+  feature = "LABEL_DETECTION",
+  maxNumResults = NULL
+)
 }
 \arguments{
 \item{imagePaths}{character, file paths, URLs or Cloud Storage URIs of the images,
@@ -13,7 +16,7 @@ can be a combination of all three}
 
 \item{feature}{character, one out of: "LABEL_DETECTION", "FACE_DETECTION",
 "TEXT_DETECTION", "DOCUMENT_TEXT_DETECTION", "LOGO_DETECTION",
-"LANDMARK_DETECTION", "IMAGE_PROPERTIES"}
+"LANDMARK_DETECTION", "IMAGE_PROPERTIES", "OBJECT_LOCALIZATION"}
 
 \item{maxNumResults}{integer, the maximum number of results (per image) to be returned.}
 }

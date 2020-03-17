@@ -6,7 +6,7 @@
 #'   can be a combination of all three
 #' @param feature character, one out of: "LABEL_DETECTION", "FACE_DETECTION",
 #'   "TEXT_DETECTION", "DOCUMENT_TEXT_DETECTION", "LOGO_DETECTION",
-#'   "LANDMARK_DETECTION", "IMAGE_PROPERTIES"
+#'   "LANDMARK_DETECTION", "IMAGE_PROPERTIES", "OBJECT_LOCALIZATION"
 #' @param maxNumResults integer, the maximum number of results (per image) to be returned.
 #' @param batchSize integer, the chunk size for batch processing
 #' @param savePath character, if specified, results will be saved to this path (as .csv)
@@ -296,6 +296,8 @@ extractor <- function(featureType) {
         landmark_detection_extractor
     } else if (featureType == "imagePropertiesAnnotation") {
         image_properties_extractor
+    } else if (featureType == "localizedObjectAnnotations") {
+        object_localization_extractor
     } else {
         stop("Unrecognized feature type")
     }
@@ -410,6 +412,21 @@ image_properties_extractor <- function(response) {
         )
 }
 
+#' @title helper function code to extract API response into a data.table for given feature type
+#'
+#' @param response an element of the API response object
+#'
+#' @return a data.table
+#'
+object_localization_extractor <- function(response) {
+    boundingBoxes <- get_bounding_boxes(response)
+
+    cbind(
+        data.table::as.data.table(response[, c("mid", "name", "score")]),
+        boundingBoxes
+    )
+}
+
 #' @title helper function code to extract Bounding Box x,y coordinates for an API response element
 #'
 #' @param response an element of the API response object
@@ -417,7 +434,14 @@ image_properties_extractor <- function(response) {
 #' @return a data.table
 #'
 get_bounding_boxes <- function(response) {
-    purrr::map(response[["boundingPoly"]]$vertices, ~{
+    if (!is.null(response[["boundingPoly"]][["vertices"]])) {
+        vertices <- response[["boundingPoly"]][["vertices"]]
+    } else {
+        vertices <- response[["boundingPoly"]][["normalizedVertices"]]
+    }
+    if (is.null(vertices)) stop("Error returning bounding boxes.")
+
+    purrr::map(vertices, ~{
         data.table(
             x = paste(.x[["x"]], collapse = ", "),
             y = paste(.x[["y"]], collapse = ", ")

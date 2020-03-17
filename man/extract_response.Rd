@@ -14,7 +14,7 @@ can be a combination of all three}
 
 \item{feature}{character, one out of: "LABEL_DETECTION", "FACE_DETECTION",
 "TEXT_DETECTION", "DOCUMENT_TEXT_DETECTION", "LOGO_DETECTION",
-"LANDMARK_DETECTION", "IMAGE_PROPERTIES"}
+"LANDMARK_DETECTION", "IMAGE_PROPERTIES", "OBJECT_LOCALIZATION"}
 }
 \value{
 a data.table

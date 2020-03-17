@@ -11,7 +11,7 @@ create_single_image_request(imagePath, feature, maxNumResults)
 
 \item{feature}{character, one out of: "LABEL_DETECTION", "FACE_DETECTION",
 "TEXT_DETECTION", "DOCUMENT_TEXT_DETECTION", "LOGO_DETECTION",
-"LANDMARK_DETECTION", "IMAGE_PROPERTIES"}
+"LANDMARK_DETECTION", "IMAGE_PROPERTIES", "OBJECT_LOCALIZATION"}
 
 \item{maxNumResults}{integer, the maximum number of results (per image) to be returned.}
 }

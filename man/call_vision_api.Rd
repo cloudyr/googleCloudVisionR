@@ -4,8 +4,11 @@
 \alias{call_vision_api}
 \title{helper function to send POST request to the Google Vision API}
 \usage{
-call_vision_api(body, apiEndpoint = "images:annotate",
-  httpRequestType = "POST")
+call_vision_api(
+  body,
+  apiEndpoint = "images:annotate",
+  httpRequestType = "POST"
+)
 }
 \arguments{
 \item{body, }{output of create_request_body()}

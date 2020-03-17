@@ -4,8 +4,14 @@
 \alias{gcv_get_product_search_raw_response}
 \title{Get raw results from the Vision API Product Search}
 \usage{
-gcv_get_product_search_raw_response(imagePath, projectId, locationId,
-  productSetId, productCategory, maxNumResults)
+gcv_get_product_search_raw_response(
+  imagePath,
+  projectId,
+  locationId,
+  productSetId,
+  productCategory,
+  maxNumResults
+)
 }
 \arguments{
 \item{imagePath}{character, file path, URLs or Cloud Storage URI of the image}

@@ -15,6 +15,7 @@ gcv_get_available_feature_types <- function() {
         LOGO_DETECTION          = "logoAnnotations",
         LANDMARK_DETECTION      = "landmarkAnnotations",
         IMAGE_PROPERTIES        = "imagePropertiesAnnotation",
-        OBJECT_LOCALIZATION     = "localizedObjectAnnotations"
+        OBJECT_LOCALIZATION     = "localizedObjectAnnotations",
+        WEB_DETECTION           = ""
     )
 }
